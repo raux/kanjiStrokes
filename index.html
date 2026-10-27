@@ -3,142 +3,96 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>今日の一字 — 木</title>
-  <style>
-    :root {
-      color-scheme: light;
-      --paper: #f6f1e7;
-      --paper-shadow: #e5ddcf;
-      --ink: #302d29;
-      --guide: #d5ccbe;
-      --accent: #a84e39;
-      --muted: #766f66;
-    }
-    * { box-sizing: border-box; }
-    body {
-      min-height: 100vh;
-      margin: 0;
-      display: grid;
-      place-items: center;
-      background: radial-gradient(circle at 50% 35%, #fffdf8 0, var(--paper) 54%, #e9e0d2 100%);
-      color: var(--ink);
-      font-family: "Hiragino Mincho ProN", "Yu Mincho", YuMincho, "Noto Serif JP", ui-serif, Georgia, serif;
-    }
-    main { width: min(92vw, 580px); text-align: center; padding: 3rem 1.5rem; }
-    .eyebrow { color: var(--accent); font: 600 .72rem/1.2 ui-sans-serif, system-ui, sans-serif; letter-spacing: .18em; text-transform: uppercase; }
-    h1 { margin: .5rem 0 .2rem; font-size: clamp(2.2rem, 6vw, 3.8rem); font-weight: 500; }
-    .reading { margin: 0; color: var(--muted); font-size: 1rem; }
-    .sheet { margin: 2.2rem auto 1.5rem; padding: 1.3rem; max-width: 410px; background: rgba(255,253,248,.62); border: 1px solid var(--paper-shadow); box-shadow: 0 18px 45px rgba(66, 51, 33, .08); }
-    svg { width: 100%; display: block; }
-    .stroke {
-      fill: none;
-      stroke: var(--guide);
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      filter: url(#soft-ink);
-    }
-    .stroke.active { stroke: var(--accent); }
-    .stroke.complete { stroke: var(--ink); }
-    #brush { fill: var(--accent); filter: drop-shadow(0 1px 2px rgba(0,0,0,.18)); }
-    .paper-fibre { opacity: .38; mix-blend-mode: multiply; }
-    .status { min-height: 1.5em; color: var(--muted); font-size: .95rem; }
-    button { margin-top: 1rem; padding: .7rem 1.05rem; border: 1px solid #b9aa96; border-radius: 999px; background: transparent; color: var(--ink); cursor: pointer; font: 600 .85rem ui-sans-serif, system-ui, sans-serif; letter-spacing: .03em; }
-    button:hover, button:focus-visible { background: #fffaf1; outline: 3px solid rgba(168,78,57,.2); outline-offset: 3px; }
-    .hint { margin-top: 2rem; color: var(--muted); font-size: .9rem; }
-    @media (prefers-reduced-motion: reduce) { #brush { display: none; } }
-  </style>
+  <meta name="theme-color" content="#f6f3eb">
+  <meta name="description" content="A quiet space to study Japanese kanji stroke order. Enter characters, follow each stroke, and practice at your own pace.">
+  <title>Kanji Strokes — a little practice, every day</title>
+  <link rel="stylesheet" href="./style.css">
+  <script src="./app.js" defer></script>
 </head>
 <body>
-  <main>
-    <div class="eyebrow">今日の一字 · today’s character</div>
-    <h1>木</h1>
-    <p class="reading">き / もく &nbsp;—&nbsp; tree</p>
+  <header class="site-header">
+    <a class="brand" href="./" aria-label="Kanji Strokes home"><span class="seal" lang="ja">書</span> kanji<span class="brand-light">strokes</span></a>
+    <span class="header-note">A LITTLE PRACTICE, EVERY DAY</span>
+    <span class="level">日本語 <span>·</span> N1 STUDY</span>
+  </header>
 
-    <section class="sheet" aria-label="Animated stroke order for 木">
-      <svg viewBox="0 0 200 200" role="img" aria-label="The four strokes of the kanji 木">
-        <defs>
-          <filter id="soft-ink" x="-10%" y="-10%" width="120%" height="120%">
-            <feTurbulence type="fractalNoise" baseFrequency=".018" numOctaves="1" seed="7" result="grain" />
-            <feDisplacementMap in="SourceGraphic" in2="grain" scale=".45" xChannelSelector="R" yChannelSelector="G" />
-          </filter>
-          <filter id="paper-grain"><feTurbulence type="fractalNoise" baseFrequency=".75" numOctaves="2" /></filter>
-        </defs>
-        <rect class="paper-fibre" x="8" y="8" width="184" height="184" filter="url(#paper-grain)" />
-        <path class="stroke" stroke-width="7" d="M45 57 C71 52 117 55 155 50" />
-        <path class="stroke" stroke-width="10" d="M103 33 C100 67 103 119 99 168" />
-        <path class="stroke" stroke-width="8" d="M94 101 C82 120 62 143 46 159" />
-        <path class="stroke" stroke-width="9" d="M109 100 C123 119 146 145 159 160" />
-        <circle id="brush" r="5" opacity="0" />
-      </svg>
+  <main>
+    <section class="intro">
+      <p class="eyebrow"><span></span> THE ART OF REMEMBERING</p>
+      <h1>One character.<br><em>One stroke at a time.</em></h1>
+      <p class="intro-copy">Make room for a little Japanese. Explore a kanji,<br class="desktop-break"> follow the ink, and let your hand remember.</p>
     </section>
 
-    <p id="status" class="status" aria-live="polite">Breathe. Follow the brush.</p>
-    <button id="replay" type="button">Replay slowly</button>
-    <p class="hint">Four strokes · pause after each gesture</p>
+    <div class="workspace">
+      <aside class="study-panel" aria-label="Choose characters">
+        <div class="section-label"><span>01</span> YOUR CHARACTERS</div>
+        <h2>What will you write today?</h2>
+        <form id="character-form">
+          <label for="characters">Enter a kanji or a Japanese word</label>
+          <div class="input-wrap">
+            <input id="characters" name="characters" value="憂" placeholder="e.g. 憂鬱, 勉強, 木" autocomplete="off" spellcheck="false" aria-describedby="input-help">
+            <button type="submit" class="submit-button" aria-label="Study these characters">→</button>
+          </div>
+          <p id="input-help" class="helper">Paste a word, too. We’ll take it one kanji at a time.</p>
+        </form>
+        <p id="input-error" class="error" role="alert"></p>
+        <div id="character-list" class="character-list" role="group" aria-label="Characters to study"></div>
+        <div class="suggestions">
+          <div class="section-label">A LITTLE N1 INSPIRATION</div>
+          <div class="preset-list">
+            <button type="button" class="preset" data-word="憂"><span lang="ja">憂</span><span>Melancholy<small>ゆう · うれえる</small></span><span class="preset-arrow">↗</span></button>
+            <button type="button" class="preset" data-word="響"><span lang="ja">響</span><span>Resonance<small>きょう · ひびく</small></span><span class="preset-arrow">↗</span></button>
+            <button type="button" class="preset" data-word="曖昧"><span lang="ja">曖昧</span><span>Ambiguity<small>あいまい</small></span><span class="preset-arrow">↗</span></button>
+            <button type="button" class="preset" data-word="繊細"><span lang="ja">繊細</span><span>Delicate<small>せんさい</small></span><span class="preset-arrow">↗</span></button>
+          </div>
+          <p class="helper level-note">Advanced practice, not an official JLPT kanji list.</p>
+        </div>
+        <div class="practice-note"><span class="note-icon">✳</span><p>Slow is a good place to start.<br><span>Notice the direction, not just the shape.</span></p></div>
+      </aside>
+
+      <section class="drawing-panel" aria-label="Stroke order study">
+        <div class="drawing-heading">
+          <div><p class="section-label">02 <span>FOLLOW THE INK</span></p><h2><span id="current-character" lang="ja">憂</span><span id="character-meaning">melancholy; worry</span></h2><p id="character-reading" lang="ja">ゆう · うれえる · うれい</p></div>
+          <span id="stroke-count" class="stroke-count">Loading…</span>
+        </div>
+        <div class="sheet">
+          <span class="sheet-corner top-left"></span><span class="sheet-corner bottom-right"></span>
+          <svg id="canvas" viewBox="0 0 109 109" role="img" aria-label="Stroke order for 憂">
+            <defs>
+              <filter id="ink-texture" x="-5%" y="-5%" width="110%" height="110%">
+                <feTurbulence type="fractalNoise" baseFrequency=".12" numOctaves="2" seed="8" result="noise"/>
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale=".16"/>
+              </filter>
+            </defs>
+            <g id="guidelines" class="guidelines"><path d="M54.5 4V105 M4 54.5H105"/><path class="diagonal" d="M4 4L105 105 M105 4L4 105"/></g>
+            <g id="ghost-strokes" class="ghost-strokes"></g>
+            <g id="ink-strokes" class="ink-strokes" filter="url(#ink-texture)"></g>
+            <g id="stroke-numbers" class="stroke-numbers" hidden></g>
+            <circle id="brush" r="1.8" opacity="0"/>
+          </svg>
+          <div id="loading-message" class="canvas-message" role="status">Preparing your practice…</div>
+          <button id="retry" class="retry" type="button" hidden>Try again</button>
+          <span class="sheet-caption">筆順 <span>·</span> STROKE ORDER</span>
+        </div>
+        <div class="progress-row"><p id="status" role="status" aria-live="polite">Getting the ink ready.</p><span id="progress-count">—</span></div>
+        <div id="progress-track" class="progress-track" aria-hidden="true"><span></span></div>
+        <div class="playback" role="group" aria-label="Playback controls">
+          <button id="restart" class="icon-button" type="button" aria-label="Restart animation" title="Restart" disabled>↺</button>
+          <button id="play" class="play-button" type="button" disabled><span id="play-icon" aria-hidden="true">▶</span> <span id="play-label">Play strokes</span></button>
+          <button id="step" class="icon-button" type="button" aria-label="Show next stroke" title="Next stroke" disabled>→|</button>
+          <span class="control-divider"></span>
+          <label class="speed-label" for="speed">Pace <select id="speed"><option value="1.6">Unhurried</option><option value="1" selected>Slow & steady</option><option value="0.55">A little faster</option></select></label>
+        </div>
+        <div class="display-options">
+          <label><input id="show-guides" type="checkbox" checked> Practice grid</label>
+          <label><input id="show-numbers" type="checkbox"> Stroke numbers</label>
+          <span id="motion-note" hidden>Reduced motion: strokes appear without animation.</span>
+        </div>
+      </section>
+    </div>
+    <section class="bottom-note"><span lang="ja">日々精進</span><p>Small steps. Lasting impressions.<br><span>A few thoughtful strokes today, a little more confidence tomorrow.</span></p></section>
   </main>
-
-  <script>
-    const strokes = [...document.querySelectorAll('.stroke')];
-    const brush = document.querySelector('#brush');
-    const status = document.querySelector('#status');
-    const replay = document.querySelector('#replay');
-    const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
-    const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
-
-    function reset() {
-      strokes.forEach(stroke => {
-        stroke.classList.remove('active', 'complete');
-        const length = stroke.getTotalLength();
-        stroke.style.strokeDasharray = length;
-        stroke.style.strokeDashoffset = length;
-      });
-      brush.setAttribute('opacity', '0');
-    }
-
-    function draw(stroke, duration) {
-      const length = stroke.getTotalLength();
-      stroke.classList.add('active');
-      return new Promise(resolve => {
-        const start = performance.now();
-        function frame(now) {
-          const raw = Math.min((now - start) / duration, 1);
-          const progress = 1 - Math.pow(1 - raw, 3); // gentle ease-out
-          stroke.style.strokeDashoffset = length * (1 - progress);
-          const point = stroke.getPointAtLength(length * progress);
-          brush.setAttribute('cx', point.x);
-          brush.setAttribute('cy', point.y);
-          brush.setAttribute('opacity', raw < 1 ? '1' : '0');
-          if (raw < 1) requestAnimationFrame(frame);
-          else {
-            stroke.classList.remove('active');
-            stroke.classList.add('complete');
-            resolve();
-          }
-        }
-        requestAnimationFrame(frame);
-      });
-    }
-
-    async function play() {
-      replay.disabled = true;
-      reset();
-      if (reducedMotion.matches) {
-        strokes.forEach(stroke => stroke.classList.add('complete'));
-        strokes.forEach(stroke => stroke.style.strokeDashoffset = '0');
-        status.textContent = '木 — four quiet strokes.';
-      } else {
-        for (let i = 0; i < strokes.length; i++) {
-          status.textContent = `Stroke ${i + 1} of ${strokes.length}`;
-          await draw(strokes[i], 850);
-          await pause(600);
-        }
-        status.textContent = 'Rest with the completed character.';
-      }
-      replay.disabled = false;
-    }
-
-    replay.addEventListener('click', play);
-    play();
-  </script>
+  <footer><span>Made for the quiet joy of learning.</span><span>Stroke data: <a href="https://kanjivg.tagaini.net/">KanjiVG</a> by Ulrich Apel · <a href="https://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA 3.0</a></span></footer>
+  <noscript><p class="noscript">Please enable JavaScript to load kanji and explore their stroke order.</p></noscript>
 </body>
 </html>
