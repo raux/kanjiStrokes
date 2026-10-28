@@ -1,0 +1,9 @@
+{
+  "name": "kanjistrokes",
+  "private": true,
+  "type": "module",
+  "description": "Static kanji stroke-order study space with a local handwriting practice panel and the Ink Dungeon roguelike mode. No build step; tests run with node --test.",
+  "scripts": {
+    "test": "node --test tests/"
+  }
+}

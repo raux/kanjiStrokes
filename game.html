@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f3eb">
+  <meta name="description" content="Ink Dungeon — a quiet roguelike descent through five floors of kanji. Write each character from fading guidance; failed kanji return as ghosts.">
+  <title>Ink Dungeon — Kanji Strokes</title>
+  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./game/game.css">
+  <script type="module" src="./game/game-ui.js"></script>
+</head>
+<body data-depth="0">
+  <div id="depth-backdrop" aria-hidden="true"><span id="backdrop-glyph" lang="ja"></span></div>
+
+  <header class="site-header">
+    <a class="brand" href="./" aria-label="Back to the Kanji Strokes study space"><span class="seal" lang="ja">書</span> kanji<span class="brand-light">strokes</span></a>
+    <span class="header-note">INK DUNGEON · A QUIET DESCENT</span>
+    <a class="level game-exit" href="./">← STUDY SPACE</a>
+  </header>
+
+  <main class="game-main">
+    <!-- ============ START SCREEN ============ -->
+    <section id="screen-start" class="game-screen">
+      <section class="intro">
+        <p class="eyebrow"><span></span> THE ART OF REMEMBERING, TESTED</p>
+        <h1>Ink Dungeon<br><em>五層の墨</em></h1>
+        <p class="intro-copy">Descend five floors. Write each kanji from fading guidance.<br class="desktop-break"> What you fail returns as a ghost; what you defeat, you remember.</p>
+      </section>
+
+      <div class="start-grid">
+        <div class="start-panel">
+          <p class="section-label"><span>01</span> BEGIN A DESCENT</p>
+          <label class="helper" for="seed-input">Run seed</label>
+          <div class="seed-row">
+            <input id="seed-input" inputmode="numeric" autocomplete="off" spellcheck="false" aria-describedby="seed-help">
+            <button id="btn-daily" class="text-button" type="button">Today’s seed</button>
+            <button id="btn-random" class="text-button" type="button">Random</button>
+          </div>
+          <p id="seed-help" class="helper">The same seed always builds the same dungeon. Share it to compare descents.</p>
+          <button id="btn-start" class="play-button start-button" type="button">Enter the dungeon</button>
+          <p id="start-error" class="error" role="alert"></p>
+          <div class="rules-note helper">
+            <p><strong>How it goes.</strong> Each kanji’s strokes are its health. A well-placed stroke lands; a wild one misses and spills ink. Three misses and the kanji slips away — it will haunt a later floor, harder. Lose all resolve and the descent ends.</p>
+            <p>Floor 1 is bundled and works offline. Deeper floors fetch stroke data from KanjiVG.</p>
+          </div>
+        </div>
+        <div class="start-panel">
+          <p class="section-label"><span>02</span> BESTIARY</p>
+          <p id="bestiary-summary" class="helper">No descents yet.</p>
+          <ul id="bestiary-list" class="bestiary-list" aria-label="Defeated kanji"></ul>
+          <div class="practice-actions">
+            <button id="btn-clear-dungeon" class="text-button danger" type="button" disabled>Clear dungeon data</button>
+          </div>
+          <p class="helper">Dungeon records stay on this device. Clearing them never touches your practice-panel attempts.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ RUN SCREEN ============ -->
+    <section id="screen-run" class="game-screen" hidden>
+      <nav id="floor-rail" class="floor-rail" aria-label="Floors"></nav>
+
+      <div class="run-layout">
+        <div class="run-hud">
+          <div class="hud-block">
+            <span class="section-label">FLOOR</span>
+            <span id="hud-floor-name">—</span>
+          </div>
+          <div class="hud-block">
+            <span class="section-label">RESOLVE</span>
+            <span id="hud-hp" aria-label="Resolve remaining">—</span>
+          </div>
+          <div class="hud-block hud-ink">
+            <span class="section-label">INK</span>
+            <svg id="ink-dish" viewBox="0 0 40 40" role="img" aria-labelledby="ink-dish-title">
+              <title id="ink-dish-title">Ink remaining</title>
+              <circle class="dish-rim" cx="20" cy="20" r="18"/>
+              <clipPath id="ink-clip"><rect id="ink-level" x="4" y="36" width="32" height="0"/></clipPath>
+              <circle class="dish-ink" cx="20" cy="20" r="15" clip-path="url(#ink-clip)"/>
+            </svg>
+            <span id="hud-ink-count" class="helper">—</span>
+          </div>
+          <div class="hud-block">
+            <span class="section-label">RELICS</span>
+            <span id="hud-relics" class="helper">none yet</span>
+          </div>
+          <div class="hud-block">
+            <span class="section-label">SEED</span>
+            <span id="hud-seed" class="helper">—</span>
+          </div>
+        </div>
+
+        <div id="ofuda-row" class="ofuda-row" aria-label="This floor's encounters"></div>
+
+        <div class="encounter-layout">
+          <div class="encounter-brief">
+            <p id="enc-kind" class="section-label">ENCOUNTER</p>
+            <p id="enc-prompt" lang="ja">—</p>
+            <p id="enc-reading" class="helper" lang="ja"></p>
+            <p id="enc-meaning" class="helper"></p>
+            <p id="enc-strokes" class="helper"></p>
+            <div class="practice-actions">
+              <button id="btn-reveal" class="text-button" type="button">Reveal guide</button>
+              <button id="btn-replay-ref" class="text-button" type="button">Watch strokes</button>
+              <button id="btn-retreat" class="text-button danger" type="button">Retreat</button>
+            </div>
+            <button id="btn-remember" class="text-button strong" type="button" hidden>Remember this kanji</button>
+          </div>
+
+          <div>
+            <div id="game-sheet" class="practice-sheet game-sheet">
+              <svg id="game-guide" class="practice-guide" viewBox="0 0 109 109" aria-hidden="true"><g id="guide-strokes"></g></svg>
+              <canvas id="game-canvas" tabindex="0" role="img" aria-label="Writing area" aria-describedby="game-status"></canvas>
+            </div>
+            <p id="game-status" class="helper practice-status" aria-live="polite">Preparing the floor…</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ END SCREEN ============ -->
+    <section id="screen-end" class="game-screen" hidden>
+      <section class="intro">
+        <p class="eyebrow"><span></span> THE DESCENT ENDS</p>
+        <h1 id="end-title">—</h1>
+        <p id="end-note" class="intro-copy"></p>
+      </section>
+      <dl id="end-summary" class="end-summary"></dl>
+      <div class="practice-actions end-actions">
+        <button id="btn-new-run" class="play-button" type="button">Descend again</button>
+        <a class="text-button" href="./">Return to study</a>
+      </div>
+      <p class="helper end-hint">Struggled kanji are good study candidates — they are waiting in the practice panel.</p>
+    </section>
+  </main>
+
+  <footer><span>Made for the quiet joy of learning.</span><span>Stroke data: <a href="https://kanjivg.tagaini.net/">KanjiVG</a> by Ulrich Apel · <a href="https://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA 3.0</a></span></footer>
+  <noscript><p class="noscript">Ink Dungeon needs JavaScript to load kanji stroke data and score your writing.</p></noscript>
+</body>
+</html>

@@ -27,6 +27,8 @@ button, input, select, a { outline-offset: 5px; }
 .header-note, .level { font-size: 10px; letter-spacing: 2px; color: var(--muted); }
 .level { color: #616d5b; letter-spacing: 1.4px; }
 .level span { padding: 0 9px; color: #b7b9ac; }
+.game-link { color: #a64f3c; text-decoration: none; letter-spacing: 1.4px; }
+.game-link:hover { text-decoration: underline; text-underline-offset: 3px; }
 main { max-width: 1110px; margin: auto; padding: 0 40px; }
 .intro { text-align: center; padding: 62px 0 49px; }
 .eyebrow, .section-label { font-size: 10px; font-weight: 600; letter-spacing: 1.8px; }

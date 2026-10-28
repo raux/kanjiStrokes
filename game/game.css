@@ -1,0 +1,150 @@
+/* Ink Dungeon — depth palettes, scroll rail, ofuda cards, calm feedback.
+   Extends style.css custom properties; depth = less light, more ink. */
+
+/* ---------- depth palettes ---------- */
+body[data-depth="1"] { --paper: #f6f3eb; --ink: #343c35; --muted: #818478; --accent: #a64f3c; --line: #dfdfd3; }
+body[data-depth="2"] { --paper: #efe7e2; --ink: #3a3334; --muted: #837a77; --accent: #99453a; --line: #d9cfca; }
+body[data-depth="3"] { --paper: #2e3442; --ink: #e8e4d8; --muted: #9aa0ae; --accent: #d79a4e; --line: #454c5c; }
+body[data-depth="4"] { --paper: #1b1a19; --ink: #ece7db; --muted: #8f8a80; --accent: #e2543a; --line: #38352f; }
+body[data-depth="5"] { --paper: #211d14; --ink: #f0e9d4; --muted: #a2977a; --accent: #c9a24b; --line: #4a4028; }
+
+body { background-color: var(--paper); color: var(--ink); }
+@media (prefers-reduced-motion: no-preference) {
+  body { transition: background-color 1.2s ease, color 1.2s ease; }
+}
+
+/* Re-anchor the shared chrome to the active palette. */
+body[data-depth] .site-header, body[data-depth] footer { border-color: var(--line); }
+body[data-depth] .brand, body[data-depth] h1, body[data-depth] h2 { color: var(--ink); }
+body[data-depth="3"] .brand-light, body[data-depth="4"] .brand-light, body[data-depth="5"] .brand-light,
+body[data-depth="3"] .header-note, body[data-depth="4"] .header-note, body[data-depth="5"] .header-note,
+body[data-depth="3"] .level, body[data-depth="4"] .level, body[data-depth="5"] .level,
+body[data-depth="3"] footer, body[data-depth="4"] footer, body[data-depth="5"] footer,
+body[data-depth="3"] h1 em, body[data-depth="4"] h1 em, body[data-depth="5"] h1 em { color: var(--muted); }
+body[data-depth="3"] footer a, body[data-depth="4"] footer a, body[data-depth="5"] footer a { color: var(--accent); }
+
+.game-main { position: relative; max-width: 1110px; margin: auto; padding: 0 40px 50px; }
+.game-exit { text-decoration: none; }
+
+/* ---------- backdrop glyph + mist ---------- */
+#depth-backdrop { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+#backdrop-glyph {
+  position: absolute; right: -6vw; bottom: -14vh;
+  font: 56vh "Noto Serif JP", serif; line-height: 1; color: var(--ink); opacity: .045;
+  user-select: none;
+}
+#depth-backdrop::before, #depth-backdrop::after {
+  content: ""; position: absolute; left: -20%; width: 140%; height: 34vh;
+  background: radial-gradient(ellipse at 50% 50%, color-mix(in srgb, var(--paper) 55%, white 8%) 0%, transparent 70%);
+  opacity: .5;
+}
+#depth-backdrop::before { top: 12vh; }
+#depth-backdrop::after { top: 52vh; }
+@media (prefers-reduced-motion: no-preference) {
+  #depth-backdrop::before { animation: mist-drift 80s linear infinite alternate; }
+  #depth-backdrop::after { animation: mist-drift 110s linear infinite alternate-reverse; }
+  @keyframes mist-drift { from { transform: translateX(-6%); } to { transform: translateX(6%); } }
+}
+
+/* ---------- screens ---------- */
+.game-screen { padding-bottom: 30px; }
+.start-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 50px; border-top: 1px solid var(--line); padding-top: 35px; }
+.start-panel .section-label { margin-bottom: 18px; }
+.seed-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+#seed-input { width: 130px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 4px; background: transparent; color: var(--ink); font: 15px ui-monospace, monospace; }
+.start-button { margin-top: 20px; }
+.rules-note { margin-top: 26px; border-top: 1px solid var(--line); padding-top: 16px; max-width: 420px; }
+.rules-note p { margin: 0 0 10px; }
+
+.bestiary-list { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; max-height: 220px; overflow-y: auto; }
+.bestiary-list li { border: 1px solid var(--line); border-radius: 4px; padding: 7px 10px; display: flex; gap: 8px; align-items: baseline; font-size: 10px; color: var(--muted); }
+.bestiary-list li .glyph { font: 20px "Noto Serif JP", serif; color: var(--ink); }
+.bestiary-list li .best-free { color: var(--accent); }
+
+/* ---------- floor rail ---------- */
+.floor-rail { position: sticky; top: 14px; float: left; margin-left: -70px; display: flex; flex-direction: column; gap: 14px; width: 48px; align-items: center; }
+.rail-marker { position: relative; display: grid; place-items: center; width: 40px; min-height: 74px; border: 1px solid var(--line); border-radius: 3px; background: color-mix(in srgb, var(--paper) 85%, transparent); color: var(--muted); }
+.rail-marker .floor-name { writing-mode: vertical-rl; font: 11px "Noto Serif JP", serif; letter-spacing: 3px; }
+.rail-marker[data-state="current"] { border-color: var(--accent); color: var(--ink); }
+.rail-marker .stamp {
+  position: absolute; inset: auto -8px -8px auto; display: grid; place-items: center;
+  width: 22px; height: 22px; border-radius: 3px; background: #a64f3c; color: #fff7e7;
+  font: 12px "Noto Serif JP", serif; transform: rotate(-6deg); box-shadow: 0 1px 3px rgba(0,0,0,.25);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .rail-marker .stamp { animation: stamp-press .35s cubic-bezier(.2, 1.6, .4, 1) both; }
+  @keyframes stamp-press { from { transform: rotate(-6deg) scale(2.2); opacity: 0; } to { transform: rotate(-6deg) scale(1); opacity: 1; } }
+}
+
+/* ---------- run layout ---------- */
+.run-layout { padding-top: 26px; }
+.run-hud { display: flex; flex-wrap: wrap; gap: 14px 34px; align-items: center; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 14px 0; }
+.hud-block { display: flex; flex-direction: column; gap: 4px; }
+#hud-floor-name { font: 15px Georgia, "Noto Serif JP", serif; }
+#hud-hp { letter-spacing: 4px; color: var(--accent); font-size: 14px; }
+.hud-ink { flex-direction: row; align-items: center; gap: 8px; }
+.hud-ink .section-label { align-self: center; }
+#ink-dish { width: 34px; height: 34px; }
+.dish-rim { fill: none; stroke: var(--line); stroke-width: 2; }
+.dish-ink { fill: var(--ink); opacity: .85; }
+#ink-level { transition: y .4s ease, height .4s ease; }
+
+/* ---------- ofuda cards ---------- */
+.ofuda-row { display: flex; flex-wrap: wrap; gap: 10px; padding: 20px 0 6px; }
+.ofuda { position: relative; width: 56px; height: 86px; display: grid; place-items: center; border: 1px solid var(--line); background: color-mix(in srgb, var(--paper) 70%, white 6%); clip-path: polygon(4% 0, 96% 1%, 100% 8%, 98% 94%, 90% 100%, 8% 99%, 0 92%, 2% 6%); }
+.ofuda .glyph { font: 26px "Noto Serif JP", serif; color: var(--ink); }
+.ofuda .count { position: absolute; bottom: 5px; font-size: 8px; color: var(--muted); letter-spacing: 1px; }
+.ofuda[data-state="current"] { border-color: var(--accent); box-shadow: 0 3px 14px color-mix(in srgb, var(--accent) 25%, transparent); }
+.ofuda[data-state="pending"] .glyph { color: var(--muted); }
+.ofuda[data-state="defeated"] .glyph { opacity: .45; }
+.ofuda[data-state="defeated"]::after {
+  content: "討"; position: absolute; inset: auto 4px 4px auto; display: grid; place-items: center;
+  width: 20px; height: 20px; border-radius: 3px; background: #a64f3c; color: #fff7e7;
+  font: 11px "Noto Serif JP", serif; transform: rotate(-7deg);
+}
+.ofuda[data-state="failed"] { border-style: dashed; }
+.ofuda[data-state="failed"] .glyph { opacity: .3; }
+.ofuda[data-state="failed"]::before { content: ""; position: absolute; inset: 55% 0 0; background: linear-gradient(to top, color-mix(in srgb, var(--ink) 30%, transparent), transparent); }
+.ofuda.is-ghost { border-color: var(--muted); background: color-mix(in srgb, var(--paper) 55%, var(--muted) 10%); }
+.ofuda.is-ghost .glyph { opacity: .6; }
+.ofuda.is-word .glyph { font-size: 15px; writing-mode: vertical-rl; }
+@media (prefers-reduced-motion: no-preference) {
+  .ofuda[data-state="defeated"]::after { animation: stamp-press .35s cubic-bezier(.2, 1.6, .4, 1) both; }
+}
+
+/* ---------- encounter ---------- */
+.encounter-layout { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: 44px; padding-top: 24px; }
+#enc-prompt { margin: 10px 0 2px; font: 54px/1.15 "Noto Serif JP", serif; min-height: 64px; }
+#enc-prompt .hidden-char { color: var(--muted); }
+#enc-reading { min-height: 1.2em; margin: 2px 0; }
+#enc-meaning { margin: 2px 0; font-style: italic; }
+#enc-strokes { margin: 10px 0 0; letter-spacing: 2px; }
+#btn-remember { margin-top: 16px; }
+
+.game-sheet { overflow: hidden; background: color-mix(in srgb, var(--paper) 60%, white 14%); border-color: var(--line); }
+#game-canvas { position: absolute; z-index: 2; inset: 0; width: 100%; height: 100%; cursor: crosshair; }
+#game-canvas:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+body[data-depth="3"] .game-sheet, body[data-depth="4"] .game-sheet, body[data-depth="5"] .game-sheet { background: color-mix(in srgb, var(--paper) 72%, white 6%); }
+.game-sheet .practice-guide { padding: 8%; } /* must match SHEET_INSET in game-ui.js */
+.game-sheet .practice-guide path { stroke: color-mix(in srgb, var(--muted) 45%, transparent); }
+.game-sheet .practice-guide.is-hidden { opacity: 0; }
+@media (prefers-reduced-motion: no-preference) { .game-sheet .practice-guide { transition: opacity 1.4s ease; } }
+.game-sheet .practice-guide path.ref-animating { stroke: var(--accent); }
+
+/* ---------- end screen ---------- */
+.end-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 16px; border-top: 1px solid var(--line); padding-top: 26px; max-width: 760px; margin: 0 auto; }
+.end-summary div { text-align: center; }
+.end-summary dt { font-size: 10px; letter-spacing: 1.6px; color: var(--muted); text-transform: uppercase; }
+.end-summary dd { margin: 6px 0 0; font: 22px Georgia, "Noto Serif JP", serif; }
+.end-actions { justify-content: center; margin-top: 28px; }
+.end-hint { text-align: center; }
+
+/* ---------- responsive ---------- */
+@media (max-width: 1240px) { .floor-rail { float: none; position: static; margin: 20px 0 0; flex-direction: row; width: auto; } .rail-marker { min-height: 58px; width: 36px; } }
+@media (max-width: 900px) {
+  .game-main { padding: 0 25px 40px; }
+  .start-grid { grid-template-columns: 1fr; gap: 30px; }
+  .encounter-layout { grid-template-columns: 1fr; gap: 20px; }
+  #enc-prompt { font-size: 40px; min-height: 50px; }
+  #backdrop-glyph { font-size: 40vh; }
+}

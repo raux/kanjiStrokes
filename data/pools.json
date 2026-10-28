@@ -1,0 +1,114 @@
+{
+  "version": 1,
+  "floors": [
+    {
+      "depth": 1,
+      "name": "The Courtyard",
+      "glyph": "庭",
+      "mode": "copy",
+      "bundledOnly": true,
+      "pool": [
+        { "char": "木", "reading": "き · もく", "meaning": "tree; wood" },
+        { "char": "憂", "reading": "ゆう · うれえる", "meaning": "melancholy; worry" },
+        { "char": "響", "reading": "きょう · ひびく", "meaning": "resonance; echo" },
+        { "char": "曖", "reading": "あい", "meaning": "unclear; obscure" },
+        { "char": "昧", "reading": "まい", "meaning": "obscure; indistinct" },
+        { "char": "繊", "reading": "せん", "meaning": "fine; slender" },
+        { "char": "細", "reading": "さい · ほそい", "meaning": "delicate; thin" },
+        { "char": "鬱", "reading": "うつ", "meaning": "gloom; melancholy" }
+      ],
+      "elites": [
+        { "word": "曖昧", "reading": "あいまい", "meaning": "ambiguity; vagueness", "chars": ["曖", "昧"] },
+        { "word": "繊細", "reading": "せんさい", "meaning": "delicate; sensitive", "chars": ["繊", "細"] }
+      ]
+    },
+    {
+      "depth": 2,
+      "name": "The Garden Pond",
+      "glyph": "水",
+      "mode": "trace",
+      "pool": [
+        { "char": "水", "reading": "みず · すい", "meaning": "water" },
+        { "char": "川", "reading": "かわ · せん", "meaning": "river" },
+        { "char": "海", "reading": "うみ · かい", "meaning": "sea; ocean" },
+        { "char": "池", "reading": "いけ · ち", "meaning": "pond" },
+        { "char": "波", "reading": "なみ · は", "meaning": "wave" },
+        { "char": "泳", "reading": "およぐ · えい", "meaning": "to swim" },
+        { "char": "涙", "reading": "なみだ · るい", "meaning": "tears" },
+        { "char": "洗", "reading": "あらう · せん", "meaning": "to wash" },
+        { "char": "湖", "reading": "みずうみ · こ", "meaning": "lake" },
+        { "char": "汗", "reading": "あせ · かん", "meaning": "sweat" }
+      ],
+      "elites": [
+        { "word": "海水", "reading": "かいすい", "meaning": "seawater", "chars": ["海", "水"] }
+      ]
+    },
+    {
+      "depth": 3,
+      "name": "Night Study",
+      "glyph": "月",
+      "mode": "cued",
+      "pool": [
+        { "char": "月", "reading": "つき · げつ", "meaning": "moon; month" },
+        { "char": "夜", "reading": "よる · や", "meaning": "night" },
+        { "char": "夢", "reading": "ゆめ · む", "meaning": "dream" },
+        { "char": "星", "reading": "ほし · せい", "meaning": "star" },
+        { "char": "暗", "reading": "くらい · あん", "meaning": "dark; dim" },
+        { "char": "静", "reading": "しずか · せい", "meaning": "quiet; calm" },
+        { "char": "眠", "reading": "ねむる · みん", "meaning": "to sleep" },
+        { "char": "影", "reading": "かげ · えい", "meaning": "shadow; silhouette" },
+        { "char": "窓", "reading": "まど · そう", "meaning": "window" },
+        { "char": "灯", "reading": "ひ · とう", "meaning": "lamp; light" }
+      ],
+      "elites": [
+        { "word": "月夜", "reading": "つきよ", "meaning": "moonlit night", "chars": ["月", "夜"] }
+      ]
+    },
+    {
+      "depth": 4,
+      "name": "The Ink Depths",
+      "glyph": "墨",
+      "mode": "free",
+      "pool": [
+        { "char": "墨", "reading": "すみ · ぼく", "meaning": "ink; ink stick" },
+        { "char": "筆", "reading": "ふで · ひつ", "meaning": "brush; writing" },
+        { "char": "書", "reading": "かく · しょ", "meaning": "to write; writing" },
+        { "char": "絵", "reading": "え · かい", "meaning": "picture; painting" },
+        { "char": "紙", "reading": "かみ · し", "meaning": "paper" },
+        { "char": "字", "reading": "じ", "meaning": "character; letter" },
+        { "char": "詩", "reading": "し", "meaning": "poem; poetry" },
+        { "char": "線", "reading": "せん", "meaning": "line" },
+        { "char": "点", "reading": "てん", "meaning": "point; dot" },
+        { "char": "画", "reading": "が · かく", "meaning": "stroke; picture" }
+      ],
+      "elites": [
+        { "word": "墨絵", "reading": "すみえ", "meaning": "ink painting", "chars": ["墨", "絵"] }
+      ]
+    },
+    {
+      "depth": 5,
+      "name": "The Gold Screen",
+      "glyph": "金",
+      "mode": "free",
+      "pool": [
+        { "char": "金", "reading": "かね · きん", "meaning": "gold; metal; money" },
+        { "char": "銀", "reading": "ぎん", "meaning": "silver" },
+        { "char": "鐘", "reading": "かね · しょう", "meaning": "bell" },
+        { "char": "輝", "reading": "かがやく · き", "meaning": "to shine; radiance" },
+        { "char": "鏡", "reading": "かがみ · きょう", "meaning": "mirror" }
+      ],
+      "elites": [
+        { "word": "金銀", "reading": "きんぎん", "meaning": "gold and silver", "chars": ["金", "銀"] }
+      ]
+    }
+  ],
+  "boss": {
+    "word": "憂鬱",
+    "reading": "ゆううつ",
+    "meaning": "melancholy; gloom; depression",
+    "chars": [
+      { "char": "憂", "reading": "ゆう · うれえる", "meaning": "melancholy; worry" },
+      { "char": "鬱", "reading": "うつ", "meaning": "gloom; melancholy" }
+    ]
+  }
+}
