@@ -177,10 +177,17 @@ async function selectCharacter(character) {
   ink.replaceChildren();
   ghosts.replaceChildren();
   numbers.replaceChildren();
-  const entry = vocabulary[character];
+  const entry = knownMeaning(character);
   $("#current-character").textContent = character;
   $("#character-meaning").textContent = entry ? entry.meaning : "your kanji practice";
   $("#character-reading").textContent = entry ? entry.reading : "Focus on the shape, direction, and order.";
+  if (!entry) {
+    lookupMeaning(character).then(found => {
+      if (selectedCharacter !== character) return;
+      $("#character-meaning").textContent = found.meaning;
+      if (found.reading) $("#character-reading").textContent = found.reading;
+    }).catch(() => {});
+  }
   canvas.setAttribute("aria-label", `Stroke order for ${character}`);
   document.title = `${character} — Kanji Strokes`;
   practiceSetCharacter(character);
@@ -189,7 +196,7 @@ async function selectCharacter(character) {
   $("#loading-message").hidden = false;
   $("#retry").hidden = true;
   status.textContent = "Getting the ink ready.";
-  document.querySelectorAll(".character-chip").forEach(button => button.setAttribute("aria-pressed", String(button.textContent === character)));
+  document.querySelectorAll(".character-chip").forEach(button => button.setAttribute("aria-pressed", String(button.dataset.character === character)));
   updateControls();
   const timeout = setTimeout(() => controller.abort("timeout"), 15000);
   try {
@@ -247,18 +254,91 @@ function study(value) {
   }
   error.textContent = "";
   historyRecord(characters);
-  $("#character-list").replaceChildren(...characters.map(character => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "character-chip";
-    button.lang = "ja";
-    button.textContent = character;
-    button.setAttribute("aria-label", `Study ${character}`);
-    button.setAttribute("aria-pressed", "false");
-    button.addEventListener("click", () => selectCharacter(character));
-    return button;
-  }));
+  sessionSetCurrent(characters);
+  $("#character-list").replaceChildren(...characters.map(character => makeCharacterChip(character, `Study ${character}`)));
   selectCharacter(characters[0]);
+}
+
+/* ---------- Kanji meanings: local vocabulary first, then kanjiapi.dev ---------- */
+
+const MEANINGS_KEY = "kanjiStrokes.meanings.v1";
+const MEANINGS_URL = "https://kanjiapi.dev/v1/kanji/";
+const meaningsPending = new Map();
+
+function meaningsLoad() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(MEANINGS_KEY));
+    if (!parsed || typeof parsed !== "object") return {};
+    const clean = {};
+    for (const [character, entry] of Object.entries(parsed)) {
+      if (entry && typeof entry.meaning === "string" && entry.meaning && typeof entry.reading === "string") clean[character] = { meaning: entry.meaning, reading: entry.reading };
+    }
+    return clean;
+  } catch {
+    return {};
+  }
+}
+
+const meaningsCache = meaningsLoad();
+
+function meaningsSave() {
+  try {
+    localStorage.setItem(MEANINGS_KEY, JSON.stringify(meaningsCache));
+  } catch {
+    /* Meanings still show on this page; storage is unavailable. */
+  }
+}
+
+function knownMeaning(character) {
+  return vocabulary[character] || meaningsCache[character] || null;
+}
+
+async function lookupMeaning(character) {
+  const known = knownMeaning(character);
+  if (known) return known;
+  if (meaningsPending.has(character)) return meaningsPending.get(character);
+  const request = (async () => {
+    const response = await fetch(`${MEANINGS_URL}${encodeURIComponent(character)}`);
+    if (!response.ok) throw new Error(`The meaning service returned ${response.status}.`);
+    const data = await response.json();
+    const meaning = Array.isArray(data.meanings) ? data.meanings.filter(item => typeof item === "string").slice(0, 2).join("; ") : "";
+    if (!meaning) throw new Error(`No meaning found for ${character}.`);
+    const readings = [
+      ...(Array.isArray(data.on_readings) ? data.on_readings : []),
+      ...(Array.isArray(data.kun_readings) ? data.kun_readings : []),
+    ].filter(item => typeof item === "string").slice(0, 3);
+    const entry = { meaning, reading: readings.join(" · ") };
+    meaningsCache[character] = entry;
+    meaningsSave();
+    return entry;
+  })();
+  meaningsPending.set(character, request);
+  try {
+    return await request;
+  } finally {
+    meaningsPending.delete(character);
+  }
+}
+
+function makeCharacterChip(character, ariaLabel) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "character-chip";
+  button.dataset.character = character;
+  button.setAttribute("aria-label", ariaLabel);
+  button.setAttribute("aria-pressed", String(character === selectedCharacter));
+  const glyph = document.createElement("span");
+  glyph.className = "chip-kanji";
+  glyph.lang = "ja";
+  glyph.textContent = character;
+  const meaning = document.createElement("span");
+  meaning.className = "chip-meaning";
+  const known = knownMeaning(character);
+  if (known) meaning.textContent = known.meaning;
+  else lookupMeaning(character).then(entry => { meaning.textContent = entry.meaning; }).catch(() => {});
+  button.append(glyph, meaning);
+  button.addEventListener("click", () => selectCharacter(character));
+  return button;
 }
 
 /* ---------- Studied-kanji history: remember what was pasted, revisit any time ---------- */
@@ -288,17 +368,7 @@ function historySave() {
 
 function historyRender() {
   const container = $("#history-list");
-  container.replaceChildren(...historyList.map(character => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "character-chip";
-    button.lang = "ja";
-    button.textContent = character;
-    button.setAttribute("aria-label", `Practice ${character} again`);
-    button.setAttribute("aria-pressed", String(character === selectedCharacter));
-    button.addEventListener("click", () => selectCharacter(character));
-    return button;
-  }));
+  container.replaceChildren(...historyList.map(character => makeCharacterChip(character, `Practice ${character} again`)));
   $("#history-empty").hidden = historyList.length > 0;
   $("#history-clear").hidden = !historyList.length;
 }
@@ -321,6 +391,134 @@ $("#history-clear").addEventListener("click", () => {
 });
 
 historyRender();
+
+/* ---------- Saved kanji lists: keep a session's set to load in the future ---------- */
+
+const SESSIONS_KEY = "kanjiStrokes.sessions.v1";
+const SESSIONS_MAX = 20;
+const SESSION_NAME_MAX = 40;
+
+function sessionValidCharacter(item) {
+  return typeof item === "string" && [...item].length === 1 && (/\p{Unified_Ideograph}/u.test(item) || item === "々");
+}
+
+function sessionsLoad() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(SESSIONS_KEY));
+    if (!Array.isArray(parsed)) return [];
+    return parsed.map(entry => {
+      if (!entry || typeof entry.id !== "string" || typeof entry.name !== "string" || !Array.isArray(entry.characters)) return null;
+      const characters = [...new Set(entry.characters.filter(sessionValidCharacter))].slice(0, MAX_CHARACTERS);
+      if (!characters.length) return null;
+      return {
+        id: entry.id,
+        name: entry.name.slice(0, SESSION_NAME_MAX) || characters.join(""),
+        characters,
+        createdAt: typeof entry.createdAt === "string" && !Number.isNaN(Date.parse(entry.createdAt)) ? entry.createdAt : new Date().toISOString(),
+      };
+    }).filter(Boolean).slice(0, SESSIONS_MAX);
+  } catch {
+    return [];
+  }
+}
+
+let sessionsList = sessionsLoad();
+let sessionCurrent = [];
+
+function sessionsSave() {
+  try {
+    localStorage.setItem(SESSIONS_KEY, JSON.stringify(sessionsList));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function sessionSetCurrent(characters) {
+  sessionCurrent = [...characters];
+  $("#session-save").disabled = !sessionCurrent.length;
+}
+
+function sessionDate(entry) {
+  const date = new Date(entry.createdAt);
+  return Number.isNaN(date.getTime()) ? "" : date.toLocaleDateString(undefined, { dateStyle: "medium" });
+}
+
+function sessionNote(message) {
+  const note = $("#session-empty");
+  note.hidden = false;
+  note.textContent = message;
+}
+
+function sessionsRender() {
+  const list = $("#session-list");
+  list.replaceChildren(...sessionsList.map(entry => {
+    const item = document.createElement("li");
+    const load = document.createElement("button");
+    load.type = "button";
+    load.className = "session-load";
+    load.setAttribute("aria-label", `Load the list ${entry.name}: ${entry.characters.join("")}`);
+    const name = document.createElement("span");
+    name.className = "session-name";
+    name.textContent = entry.name;
+    const kanji = document.createElement("span");
+    kanji.className = "session-kanji";
+    kanji.lang = "ja";
+    kanji.textContent = entry.characters.join("");
+    const date = document.createElement("span");
+    date.className = "session-date";
+    date.textContent = sessionDate(entry);
+    load.append(name, kanji, date);
+    load.addEventListener("click", () => {
+      const word = entry.characters.join("");
+      $("#characters").value = word;
+      study(word);
+    });
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.className = "text-button danger";
+    remove.textContent = "Delete";
+    remove.setAttribute("aria-label", `Delete the list ${entry.name}`);
+    remove.addEventListener("click", () => {
+      if (!window.confirm(`Delete the saved list “${entry.name}”? This cannot be undone.`)) return;
+      sessionsList = sessionsList.filter(other => other.id !== entry.id);
+      sessionsSave();
+      sessionsRender();
+    });
+    item.append(load, remove);
+    return item;
+  }));
+  const empty = $("#session-empty");
+  empty.hidden = sessionsList.length > 0;
+  empty.textContent = "Save a set of kanji to come back to it in a future session.";
+}
+
+$("#session-save").addEventListener("click", () => {
+  if (!sessionCurrent.length) return;
+  const fallback = sessionCurrent.join("");
+  const input = window.prompt("Name this kanji list:", fallback);
+  if (input === null) return;
+  const name = (input.trim() || fallback).slice(0, SESSION_NAME_MAX);
+  const existing = sessionsList.find(entry => entry.characters.join("") === fallback);
+  if (existing) {
+    existing.name = name;
+    existing.createdAt = new Date().toISOString();
+    sessionsList = [existing, ...sessionsList.filter(entry => entry !== existing)];
+  } else {
+    sessionsList.unshift({
+      id: `session-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      name,
+      characters: [...sessionCurrent],
+      createdAt: new Date().toISOString(),
+    });
+    sessionsList = sessionsList.slice(0, SESSIONS_MAX);
+  }
+  const persisted = sessionsSave();
+  sessionsRender();
+  if (!persisted) sessionNote(`“${name}” is kept on this page, but this browser could not save it for future sessions.`);
+});
+
+sessionsRender();
 
 $("#character-form").addEventListener("submit", event => {
   event.preventDefault();
