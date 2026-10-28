@@ -246,6 +246,7 @@ function study(value) {
     return;
   }
   error.textContent = "";
+  historyRecord(characters);
   $("#character-list").replaceChildren(...characters.map(character => {
     const button = document.createElement("button");
     button.type = "button";
@@ -259,6 +260,67 @@ function study(value) {
   }));
   selectCharacter(characters[0]);
 }
+
+/* ---------- Studied-kanji history: remember what was pasted, revisit any time ---------- */
+
+const HISTORY_KEY = "kanjiStrokes.history.v1";
+const HISTORY_MAX = 60;
+
+function historyLoad() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(HISTORY_KEY));
+    if (!Array.isArray(parsed)) return [];
+    return [...new Set(parsed.filter(item => typeof item === "string" && [...item].length === 1 && (/\p{Unified_Ideograph}/u.test(item) || item === "々")))].slice(0, HISTORY_MAX);
+  } catch {
+    return [];
+  }
+}
+
+let historyList = historyLoad();
+
+function historySave() {
+  try {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(historyList));
+  } catch {
+    /* History still works for this page; storage is unavailable. */
+  }
+}
+
+function historyRender() {
+  const container = $("#history-list");
+  container.replaceChildren(...historyList.map(character => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "character-chip";
+    button.lang = "ja";
+    button.textContent = character;
+    button.setAttribute("aria-label", `Practice ${character} again`);
+    button.setAttribute("aria-pressed", String(character === selectedCharacter));
+    button.addEventListener("click", () => selectCharacter(character));
+    return button;
+  }));
+  $("#history-empty").hidden = historyList.length > 0;
+  $("#history-clear").hidden = !historyList.length;
+}
+
+function historyRecord(characters) {
+  historyList = [...new Set([...characters, ...historyList])].slice(0, HISTORY_MAX);
+  historySave();
+  historyRender();
+}
+
+$("#history-clear").addEventListener("click", () => {
+  if (!window.confirm("Clear your list of studied kanji? Saved practice attempts are kept.")) return;
+  historyList = [];
+  try {
+    localStorage.removeItem(HISTORY_KEY);
+  } catch {
+    /* Cleared on this page even if storage could not be updated. */
+  }
+  historyRender();
+});
+
+historyRender();
 
 $("#character-form").addEventListener("submit", event => {
   event.preventDefault();

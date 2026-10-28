@@ -37,6 +37,14 @@
         </form>
         <p id="input-error" class="error" role="alert"></p>
         <div id="character-list" class="character-list" role="group" aria-label="Characters to study"></div>
+        <div class="history">
+          <div class="history-heading">
+            <div class="section-label">RECENTLY STUDIED</div>
+            <button id="history-clear" class="text-button danger" type="button" hidden>Clear history</button>
+          </div>
+          <div id="history-list" class="character-list history-list" role="group" aria-label="Previously studied kanji"></div>
+          <p id="history-empty" class="helper">Kanji you study will gather here, ready to revisit.</p>
+        </div>
         <div class="suggestions">
           <div class="section-label">A LITTLE N1 INSPIRATION</div>
           <div class="preset-list">
