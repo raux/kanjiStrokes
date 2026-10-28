@@ -111,6 +111,28 @@ select { display: block; max-width: 116px; padding: 3px 0; font-size: 10px; colo
 input[type="checkbox"] { accent-color: #748266; margin: 0; width: 12px; height: 12px; }
 #motion-note { width: 100%; text-align: center; }
 .bottom-note { border-top: 1px solid var(--line); padding: 29px 0 37px; display: flex; justify-content: center; gap: 24px; align-items: center; }
+.practice-panel { border-top: 1px solid var(--line); padding: 35px 0 40px; }
+.practice-panel h2 { margin: 18px 0 6px; }
+.practice-help { max-width: 460px; }
+.practice-columns { display: grid; grid-template-columns: minmax(0, 380px) minmax(0, 1fr); gap: 40px; margin-top: 24px; }
+.practice-sheet { position: relative; width: min(100%, 360px); aspect-ratio: 1; background: #fffdf7; border: 1px solid #e4e2d7; touch-action: none; }
+.practice-guide { position: absolute; inset: 0; width: 100%; height: 100%; padding: 15px; pointer-events: none; }
+.practice-guide path { fill: none; stroke: #e9e9de; stroke-width: 3.1; stroke-linecap: round; stroke-linejoin: round; }
+#practice-canvas { position: absolute; inset: 0; width: 100%; height: 100%; cursor: crosshair; }
+.practice-status { min-height: 2.2em; }
+.practice-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin-top: 12px; }
+.text-button { border: 1px solid #d5d8c8; border-radius: 4px; background: #fffdf7; padding: 8px 13px; font-size: 11px; }
+.text-button:hover:not(:disabled) { background: #eceee3; }
+.text-button.strong { background: #6f7d61; border-color: #6f7d61; color: white; }
+.text-button.strong:hover:not(:disabled) { background: #526247; }
+.text-button.danger { color: var(--accent); border-color: #d8c2ba; }
+.practice-saved .section-label { margin-bottom: 4px; }
+.practice-attempts { list-style: none; margin: 14px 0 0; padding: 0; font-size: 11px; color: var(--ink); }
+.practice-attempts li { display: flex; align-items: center; gap: 10px; padding: 9px 2px; border-top: 1px solid #e4e4d9; }
+.practice-attempts li:first-child { border-top: 0; }
+.practice-attempts label { flex: 1; cursor: pointer; }
+.practice-attempts .text-button { padding: 5px 9px; font-size: 10px; }
+.review-note { color: #56664a; }
 .bottom-note > span { font: 19px "Noto Serif JP", serif; color: #859075; letter-spacing: 4px; }
 .bottom-note p { font: italic 15px/1.8 Georgia, serif; margin: 0; }
 .bottom-note p span { font: 10px "DM Sans", sans-serif; color: var(--muted); }
@@ -143,6 +165,7 @@ footer a { color: #6c7d5e; text-underline-offset: 3px; }
   .preset > span:nth-child(2) { font-size: 10px; }
   .preset small { font-size: 9px; }
   .practice-note { display: none; }
+  .practice-columns { grid-template-columns: 1fr; gap: 24px; }
   .drawing-panel { padding: 22px 20px; }
   .bottom-note { gap: 15px; }
   .bottom-note > span { font-size: 16px; letter-spacing: 2px; }

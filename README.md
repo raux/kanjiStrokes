@@ -4,6 +4,8 @@ A quiet, responsive kanji stroke-order study space, with advanced examples for J
 
 Enter a kanji or paste a Japanese word, then select each character to study it. Play, pause, replay, or advance one stroke at a time. Change the pace, toggle the practice grid, and reveal stroke numbers. Animations respect reduced-motion preferences.
 
+Below the stroke-order study area, a handwriting practice panel lets you draw the selected kanji with a mouse, finger, or stylus; save an attempt; replay it at 0.5×, 1×, or 2×; and mark characters to “remember” for a quiet next-day review cue.
+
 The examples are study suggestions, not an official JLPT vocabulary or kanji list. Non-kanji text is ignored, repeated characters are combined, and each submission accepts up to 20 distinct characters. Readings and meanings are provided for the bundled examples; other characters show stroke order only.
 
 ## Run locally
@@ -15,6 +17,14 @@ python3 -m http.server 8000
 Then open [http://localhost:8000](http://localhost:8000).
 
 No install or build step is needed. Serve the directory over HTTP rather than opening `index.html` directly, so the browser can fetch SVG data.
+
+## Practice data and privacy
+
+- Handwriting capture happens only inside the practice panel’s writing area; the app does not record general keyboard input.
+- Saved attempts contain stroke paths and timing only, stored in this browser with `localStorage` (`kanjiStrokes.practice.v1`). Nothing is uploaded or synced.
+- At most 20 attempts per kanji are kept; the oldest is dropped when a newer one is saved.
+- You can delete a single attempt or clear all local practice data from the practice panel. Clearing browser site data also removes it.
+- Replays show your own recorded strokes; they are not graded or scored.
 
 ## Publish on GitHub Pages
 

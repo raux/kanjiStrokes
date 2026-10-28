@@ -90,6 +90,45 @@
         </div>
       </section>
     </div>
+    <section class="practice-panel" aria-labelledby="practice-title">
+      <p class="section-label">03 <span>WRITE IT YOURSELF</span></p>
+      <h2 id="practice-title">Practice <span id="practice-character" lang="ja">憂</span> in your own hand</h2>
+      <p class="helper practice-help">Draw with a mouse, finger, or stylus. Recordings stay in this browser until you delete them.</p>
+      <div class="practice-columns">
+        <div>
+          <div id="practice-sheet" class="practice-sheet">
+            <svg class="practice-guide" viewBox="0 0 109 109" aria-hidden="true"><g id="practice-guide-strokes"></g></svg>
+            <canvas id="practice-canvas" tabindex="0" role="img" aria-label="Writing area" aria-describedby="practice-status"></canvas>
+          </div>
+          <p id="practice-status" class="helper practice-status" aria-live="polite">Draw each stroke when you are ready.</p>
+          <div class="practice-actions">
+            <button id="practice-restart" class="text-button" type="button">Restart attempt</button>
+            <button id="practice-finish" class="text-button" type="button" disabled>Finish attempt</button>
+          </div>
+          <div id="practice-save-row" class="practice-actions" hidden>
+            <button id="practice-save" class="text-button strong" type="button">Save attempt</button>
+            <button id="practice-discard" class="text-button" type="button">Discard</button>
+          </div>
+        </div>
+        <div class="practice-saved">
+          <p class="section-label">SAVED ATTEMPTS</p>
+          <div class="practice-actions">
+            <label class="speed-label" for="practice-speed">Replay speed
+              <select id="practice-speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option></select>
+            </label>
+            <button id="practice-replay" class="text-button" type="button" disabled>Replay my attempt</button>
+          </div>
+          <ul id="practice-attempts" class="practice-attempts" aria-label="Saved attempts"></ul>
+          <div class="practice-actions">
+            <button id="practice-remember" class="text-button" type="button">Remember this kanji</button>
+            <button id="practice-clear" class="text-button danger" type="button" disabled>Clear all local data</button>
+          </div>
+          <p id="practice-review-note" class="helper review-note" hidden></p>
+          <p class="helper">Practice recordings never leave this device. Replays show your own strokes, not a graded result.</p>
+        </div>
+      </div>
+    </section>
+
     <section class="bottom-note"><span lang="ja">日々精進</span><p>Small steps. Lasting impressions.<br><span>A few thoughtful strokes today, a little more confidence tomorrow.</span></p></section>
   </main>
   <footer><span>Made for the quiet joy of learning.</span><span>Stroke data: <a href="https://kanjivg.tagaini.net/">KanjiVG</a> by Ulrich Apel · <a href="https://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA 3.0</a></span></footer>
