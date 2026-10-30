@@ -64,6 +64,7 @@ function reset() {
   completed = 0;
   fraction = 0;
   pauseRemaining = 0;
+  $("#completion-seal").hidden = true;
   paths.forEach((path, index) => {
     path.style.strokeDashoffset = lengths[index];
     path.classList.remove("active");
@@ -78,6 +79,7 @@ function finishStroke() {
   completed++;
   fraction = 0;
   brush.setAttribute("opacity", "0");
+  if (completed === paths.length) $("#completion-seal").hidden = false;
   status.textContent = completed === paths.length ? "A little more familiar. Make it yours." : `Stroke ${completed} of ${paths.length} complete.`;
   updateControls();
 }
@@ -96,8 +98,8 @@ function animate(now) {
     path.classList.add("active");
     path.style.strokeDashoffset = lengths[completed] * (1 - fraction);
     const point = path.getPointAtLength(lengths[completed] * fraction);
-    brush.setAttribute("cx", point.x);
-    brush.setAttribute("cy", point.y);
+    brush.setAttribute("transform", `translate(${point.x} ${point.y})`);
+    brush.querySelector(".slash-trail").setAttribute("opacity", fraction < 0.25 ? String(1 - fraction * 4) : "0");
     brush.setAttribute("opacity", motion.matches ? "0" : "1");
     const message = `Following stroke ${completed + 1} of ${paths.length}…`;
     if (status.textContent !== message) status.textContent = message;
@@ -170,6 +172,7 @@ async function selectCharacter(character) {
   const controller = loadController;
   selectedCharacter = character;
   stop();
+  $("#completion-seal").hidden = true;
   paths = [];
   lengths = [];
   completed = 0;
@@ -524,10 +527,38 @@ $("#character-form").addEventListener("submit", event => {
   event.preventDefault();
   study($("#characters").value.trim());
 });
-document.querySelectorAll(".preset").forEach(button => button.addEventListener("click", () => {
-  $("#characters").value = button.dataset.word;
-  study(button.dataset.word);
-}));
+// A small, local deck: the readings are playful reflections, not predictions.
+const tarotCards = [
+  { word: "憂", meaning: "Melancholy", reading: "ゆう · うれえる", message: "The Quiet Cloud: make room for a feeling, then let it drift on." },
+  { word: "響", meaning: "Resonance", reading: "きょう · ひびく", message: "The Echo: a small kindness may travel further than you think." },
+  { word: "曖昧", meaning: "Ambiguity", reading: "あいまい", message: "The Mist: you don't need every answer before taking one small step." },
+  { word: "繊細", meaning: "Delicate", reading: "せんさい", message: "The Fine Thread: notice the details, but be gentle with yourself." },
+];
+let tarotPile = [];
+let tarotCurrent = null;
+function refillTarot() {
+  tarotPile = tarotCards.filter(card => card !== tarotCurrent);
+  for (let i = tarotPile.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [tarotPile[i], tarotPile[j]] = [tarotPile[j], tarotPile[i]];
+  }
+}
+$("#tarot-draw").addEventListener("click", () => {
+  if (!tarotPile.length) refillTarot();
+  tarotCurrent = tarotPile.pop();
+  $("#tarot-word").textContent = tarotCurrent.word;
+  $("#tarot-meaning").textContent = tarotCurrent.meaning;
+  $("#tarot-reading").textContent = tarotCurrent.reading;
+  $("#tarot-message").textContent = tarotCurrent.message;
+  $("#tarot-card").hidden = false;
+  $("#tarot-study").hidden = false;
+  $("#tarot-draw small").textContent = "Draw again";
+});
+$("#tarot-study").addEventListener("click", () => {
+  if (!tarotCurrent) return;
+  $("#characters").value = tarotCurrent.word;
+  study(tarotCurrent.word);
+});
 playButton.addEventListener("click", play);
 $("#restart").addEventListener("click", () => { reset(); play(); });
 $("#step").addEventListener("click", () => {
@@ -643,6 +674,7 @@ function practiceData(character) {
 
 function practiceResizeCanvas() {
   const bounds = practiceSheet.getBoundingClientRect();
+  if (!bounds.width || !bounds.height) return; // The Practice tab is hidden.
   const ratio = window.devicePixelRatio || 1;
   practiceCanvas.width = Math.max(1, Math.round(bounds.width * ratio));
   practiceCanvas.height = Math.max(1, Math.round(bounds.height * ratio));
@@ -933,6 +965,29 @@ $("#practice-remember").addEventListener("click", () => {
     : "The review choice is active on this page but could not be saved in this browser.";
 });
 
+// Keep both panels mounted so switching tabs preserves the current work.
+const studyTabs = [$("#learn-tab"), $("#practice-tab")];
+function selectStudyTab(tab, focus = false) {
+  for (const item of studyTabs) {
+    const selected = item === tab;
+    item.setAttribute("aria-selected", String(selected));
+    item.tabIndex = selected ? 0 : -1;
+    document.getElementById(item.getAttribute("aria-controls")).hidden = !selected;
+  }
+  if (tab.id === "practice-tab") practiceResizeCanvas();
+  if (focus) tab.focus();
+}
+for (const tab of studyTabs) {
+  tab.addEventListener("click", () => selectStudyTab(tab));
+  tab.addEventListener("keydown", event => {
+    if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+    event.preventDefault();
+    const next = event.key === "Home" ? studyTabs[0]
+      : event.key === "End" ? studyTabs[1]
+      : studyTabs[1 - studyTabs.indexOf(tab)];
+    selectStudyTab(next, true);
+  });
+}
 window.addEventListener("resize", practiceResizeCanvas);
 practiceResizeCanvas();
 

@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;600&family=Yuji+Boku&display=swap");
 
 :root {
   color-scheme: light;
@@ -7,7 +7,7 @@
   --muted: #818478;
   --accent: #a64f3c;
   --line: #dfdfd3;
-  font-family: "DM Sans", system-ui, sans-serif;
+  font-family: "Noteworthy", "Segoe Print", system-ui, sans-serif;
   color: var(--ink);
   background: var(--paper);
 }
@@ -30,6 +30,11 @@ button, input, select, a { outline-offset: 5px; }
 .game-link { color: #a64f3c; text-decoration: none; letter-spacing: 1.4px; }
 .game-link:hover { text-decoration: underline; text-underline-offset: 3px; }
 main { max-width: 1110px; margin: auto; padding: 0 40px; }
+.study-tabs { display: flex; gap: 6px; padding: 18px 0 0; border-bottom: 1px solid var(--line); }
+.study-tab { min-width: 110px; min-height: 48px; padding: 10px 20px; border: 0; border-bottom: 3px solid transparent; background: transparent; color: #667060; font-weight: 600; }
+.study-tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+.study-tab:hover { background: #e9ecdf; }
+.study-tab:focus-visible { outline-offset: -3px; }
 .section-label { font-size: 10px; font-weight: 600; letter-spacing: 1.8px; }
 .workspace { display: grid; grid-template-columns: 315px minmax(0, 1fr); gap: 60px; padding: 35px 0 40px; border-top: 1px solid var(--line); }
 .study-panel { padding-top: 5px; }
@@ -99,7 +104,15 @@ input[type="text"], input:not([type]) { min-width: 0; width: 100%; padding: 5px 
 .ink-strokes { stroke: #364033; }
 .ink-strokes .active { stroke: var(--accent); }
 .stroke-numbers { fill: #a64f3c; font: 4px system-ui, sans-serif; paint-order: stroke; stroke: #fffdf7; stroke-width: 1px; stroke-linejoin: round; }
-#brush { fill: var(--accent); }
+/* Parchment and a subtle ink-brush flourish; paths remain the source of truth. */
+.sheet { background: linear-gradient(120deg, #eee2c9, #fffaf0 20%, #f8efd9 80%, #eee1c7); border-color: #c9b999; box-shadow: inset 0 0 24px #8c704218, 0 5px 14px #66563812; }
+#brush { pointer-events: none; }
+.brush-handle { fill: #70503a; stroke: #4c3829; stroke-width: .3; }
+.brush-tip { fill: #352e27; }
+.slash-trail { fill: none; stroke: var(--accent); stroke-width: .8; stroke-linecap: round; }
+.completion-seal { position: absolute; right: 8%; bottom: 9%; display: grid; place-items: center; width: 38px; height: 38px; border: 2px solid #a64f3c; color: #a64f3c; font: 23px "Noto Serif JP", serif; transform: rotate(-9deg); opacity: .8; animation: seal-stamp .35s ease-out; pointer-events: none; }
+@keyframes seal-stamp { from { opacity: 0; transform: rotate(-9deg) scale(1.5); } }
+@media (prefers-reduced-motion: reduce) { .completion-seal { animation: none; } }
 .sheet-corner { position: absolute; width: 9px; height: 9px; border-color: #a7ad95; border-style: solid; pointer-events: none; }
 .top-left { left: -1px; top: -1px; border-width: 1px 0 0 1px; }
 .bottom-right { right: -1px; bottom: -1px; border-width: 0 1px 1px 0; }
@@ -154,7 +167,32 @@ input[type="checkbox"] { accent-color: #748266; margin: 0; width: 12px; height: 
 footer { border-top: 1px solid var(--line); padding: 24px 6%; display: flex; justify-content: space-between; gap: 14px; color: #939889; font-size: 9px; }
 footer a { color: #6c7d5e; text-underline-offset: 3px; }
 .noscript { text-align: center; color: var(--accent); }
-/* A small deck of kanji cards keeps choosing a character tactile and clear. */
+/* English uses Noteworthy where installed; Japanese text uses a brush-style face.
+   The stroke-order SVG retains its original KanjiVG geometry. */
+h2, #character-meaning, .practice-note p, .practice-note p span,
+.bottom-note p, .bottom-note p span, .tarot-card p, .tarot-deck small {
+  font-family: "Noteworthy", "Segoe Print", system-ui, sans-serif;
+}
+[lang="ja"], .chip-kanji, .session-kanji, #characters, #current-character, .completion-seal {
+  font-family: "Yuji Boku", "Hiragino Mincho ProN", "Noto Serif JP", serif;
+}
+
+/* A touch-friendly deck and an illustrated reading card. */
+.tarot-table { display: flex; align-items: flex-start; gap: 12px; margin-top: 14px; }
+.tarot-deck { flex: 0 0 100px; min-height: 150px; padding: 10px; border: 3px solid #fffdf7; border-radius: 10px; background: repeating-linear-gradient(45deg, #667a64 0 8px, #596d58 8px 16px); color: #fffdf7; box-shadow: 3px 3px 0 #c7c9ba, 6px 6px 0 #e4e2d7; font-family: "Yuji Boku", "Noto Serif JP", serif; }
+.tarot-deck > span { display: block; font-size: 25px; line-height: 1.2; }
+.tarot-deck small { display: block; margin-top: 8px; font: 600 11px "Noteworthy", "Segoe Print", system-ui, sans-serif; }
+.tarot-card { flex: 1; min-width: 0; padding: 12px; border: 1px solid #bfae88; border-radius: 10px; background: #fffdf7; box-shadow: 0 4px 14px #343c3510; text-align: center; animation: tarot-reveal .3s ease-out; }
+.tarot-ornament { display: block; color: var(--accent); }
+.tarot-word { display: block; font: 32px "Yuji Boku", "Noto Serif JP", serif; color: #59694c; }
+.tarot-card strong, .tarot-reading { display: block; font-size: 12px; }
+.tarot-reading { margin-top: 4px; color: #667060; }
+.tarot-card p { margin: 10px 0 0; font: italic 13px/1.5 "Noteworthy", "Segoe Print", system-ui, sans-serif; }
+.tarot-study { min-height: 44px; margin-top: 14px; }
+@keyframes tarot-reveal { from { opacity: 0; transform: translateY(8px); } }
+@media (prefers-reduced-motion: reduce) { .tarot-card { animation: none; } }
+
+/* Earlier character-chip controls remain easy to tap. */
 .preset-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .preset {
   position: relative; min-width: 0; min-height: 120px; padding: 14px 12px;
@@ -209,6 +247,8 @@ footer a { color: #6c7d5e; text-underline-offset: 3px; }
   .level { text-align: right; line-height: 1.6; }
   .level span { padding: 0 3px; }
   main { padding: 0 16px; }
+  .study-tabs { padding-top: 8px; }
+  .study-tab { flex: 1; }
   .workspace { gap: 16px; padding: 20px 0 24px; }
   .study-panel { display: contents; }
   .study-panel > * { order: 1; }

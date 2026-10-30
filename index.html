@@ -17,7 +17,11 @@
   </header>
 
   <main>
-    <div class="workspace">
+    <div class="study-tabs" role="tablist" aria-label="Study mode">
+      <button id="learn-tab" class="study-tab" type="button" role="tab" aria-selected="true" aria-controls="learn-panel">Learn</button>
+      <button id="practice-tab" class="study-tab" type="button" role="tab" aria-selected="false" aria-controls="practice-panel" tabindex="-1">Practice</button>
+    </div>
+    <div class="workspace" id="learn-panel" role="tabpanel" aria-labelledby="learn-tab">
       <aside class="study-panel" aria-label="Choose characters">
         <div class="section-label"><span>01</span> YOUR CHARACTERS</div>
         <h2>What will you write today?</h2>
@@ -50,14 +54,20 @@
           <p id="session-empty" class="helper">Save a set of kanji to come back to it in a future session.</p>
         </details>
         <div class="suggestions">
-          <div class="section-label">CHOOSE A KANJI CARD</div>
-          <div class="preset-list">
-            <button type="button" class="preset" data-word="憂"><span lang="ja">憂</span><span>Melancholy<small>ゆう · うれえる</small></span><span class="preset-arrow">↗</span></button>
-            <button type="button" class="preset" data-word="響"><span lang="ja">響</span><span>Resonance<small>きょう · ひびく</small></span><span class="preset-arrow">↗</span></button>
-            <button type="button" class="preset" data-word="曖昧"><span lang="ja">曖昧</span><span>Ambiguity<small>あいまい</small></span><span class="preset-arrow">↗</span></button>
-            <button type="button" class="preset" data-word="繊細"><span lang="ja">繊細</span><span>Delicate<small>せんさい</small></span><span class="preset-arrow">↗</span></button>
+          <div class="section-label">THE KANJI DECK</div>
+          <p class="helper">Draw a card for a playful reflection and a kanji to study.</p>
+          <div class="tarot-table">
+            <button id="tarot-draw" class="tarot-deck" type="button" aria-label="Draw a kanji card"><span aria-hidden="true">✦<br>書<br>✦</span><small>Draw a card</small></button>
+            <article id="tarot-card" class="tarot-card" aria-live="polite" hidden>
+              <span class="tarot-ornament" aria-hidden="true">✧</span>
+              <span id="tarot-word" class="tarot-word" lang="ja"></span>
+              <strong id="tarot-meaning"></strong>
+              <span id="tarot-reading" class="tarot-reading" lang="ja"></span>
+              <p id="tarot-message"></p>
+            </article>
           </div>
-          <p class="helper level-note">Advanced practice, not an official JLPT kanji list.</p>
+          <button id="tarot-study" class="text-button strong tarot-study" type="button" hidden>Study this kanji</button>
+          <p class="helper level-note">For playful reflection, not prediction. Advanced examples are not an official JLPT list.</p>
         </div>
         <div class="practice-note"><span class="note-icon">✳</span><p>Slow is a good place to start.<br><span>Notice the direction, not just the shape.</span></p></div>
       </aside>
@@ -80,10 +90,15 @@
             <g id="ghost-strokes" class="ghost-strokes"></g>
             <g id="ink-strokes" class="ink-strokes" filter="url(#ink-texture)"></g>
             <g id="stroke-numbers" class="stroke-numbers" hidden></g>
-            <circle id="brush" r="1.8" opacity="0"/>
+            <g id="brush" opacity="0" aria-hidden="true">
+              <path class="slash-trail" d="M-13 8 Q-6 4 0 0"/>
+              <path class="brush-handle" d="M0 0 L5 -12 L7 -11 L2 1 Z"/>
+              <path class="brush-tip" d="M0 0 L2 1 L-1 4 Z"/>
+            </g>
           </svg>
           <div id="loading-message" class="canvas-message" role="status">Preparing your practice…</div>
           <button id="retry" class="retry" type="button" hidden>Try again</button>
+          <span id="completion-seal" class="completion-seal" aria-hidden="true" hidden>完</span>
           <span class="sheet-caption">筆順 <span>·</span> STROKE ORDER</span>
         </div>
         <div class="progress-row"><p id="status" role="status" aria-live="polite">Getting the ink ready.</p><span id="progress-count">—</span></div>
@@ -102,8 +117,7 @@
         </div>
       </section>
     </div>
-    <section class="practice-panel" aria-labelledby="practice-title">
-      <p class="section-label">03 <span>WRITE IT YOURSELF</span></p>
+    <section class="practice-panel" id="practice-panel" role="tabpanel" aria-labelledby="practice-tab" hidden>
       <h2 id="practice-title">Practice <span id="practice-character" lang="ja">憂</span> in your own hand</h2>
       <p class="helper practice-help">Draw with a mouse, finger, or stylus. Recordings stay in this browser until you delete them.</p>
       <div class="practice-columns">
