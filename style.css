@@ -30,13 +30,7 @@ button, input, select, a { outline-offset: 5px; }
 .game-link { color: #a64f3c; text-decoration: none; letter-spacing: 1.4px; }
 .game-link:hover { text-decoration: underline; text-underline-offset: 3px; }
 main { max-width: 1110px; margin: auto; padding: 0 40px; }
-.intro { text-align: center; padding: 62px 0 49px; }
-.eyebrow, .section-label { font-size: 10px; font-weight: 600; letter-spacing: 1.8px; }
-.eyebrow { color: #717e63; display: flex; justify-content: center; align-items: center; gap: 9px; }
-.eyebrow > span { width: 5px; height: 5px; background: #8a9679; border-radius: 50%; }
-h1 { margin: 21px 0 19px; font: 400 clamp(36px, 4.3vw, 53px)/1.2 Georgia, "Noto Serif JP", serif; letter-spacing: -1.6px; }
-h1 em { font-weight: 400; color: #7d886e; }
-.intro-copy { color: var(--muted); font-size: 13px; line-height: 1.9; }
+.section-label { font-size: 10px; font-weight: 600; letter-spacing: 1.8px; }
 .workspace { display: grid; grid-template-columns: 315px minmax(0, 1fr); gap: 60px; padding: 35px 0 40px; border-top: 1px solid var(--line); }
 .study-panel { padding-top: 5px; }
 .section-label { color: #838776; margin: 0; }
@@ -160,7 +154,26 @@ input[type="checkbox"] { accent-color: #748266; margin: 0; width: 12px; height: 
 footer { border-top: 1px solid var(--line); padding: 24px 6%; display: flex; justify-content: space-between; gap: 14px; color: #939889; font-size: 9px; }
 footer a { color: #6c7d5e; text-underline-offset: 3px; }
 .noscript { text-align: center; color: var(--accent); }
-@media (min-width: 1400px) { .intro { padding-top: 74px; } }
+/* A small deck of kanji cards keeps choosing a character tactile and clear. */
+.preset-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.preset {
+  position: relative; min-width: 0; min-height: 120px; padding: 14px 12px;
+  flex-direction: column; align-items: flex-start; justify-content: space-between; gap: 8px;
+  border: 1px solid #d9d9ca; border-radius: 10px; background: #fffdf7;
+  box-shadow: 0 3px 10px #343c350a;
+}
+.preset > span:first-child { min-width: 0; font-size: 30px; line-height: 1.15; color: #59694c; }
+.preset > span:nth-child(2) { max-width: 100%; font-weight: 600; }
+.preset small { font-weight: 400; line-height: 1.4; }
+.preset-arrow { position: absolute; top: 10px; right: 12px; }
+.character-chip { min-width: 56px; min-height: 56px; justify-content: center; background: #fffdf7; border-radius: 8px; }
+.study-disclosure { margin-top: 16px; padding: 0; border: 1px solid var(--line); border-radius: 8px; background: #fffdf780; }
+.study-disclosure summary { min-height: 48px; padding: 14px 12px; cursor: pointer; font-size: 12px; font-weight: 600; }
+.study-disclosure[open] { padding: 0 12px 14px; }
+.study-disclosure[open] summary { margin: 0 -12px 12px; border-bottom: 1px solid var(--line); }
+.study-disclosure .history-heading .section-label { display: none; }
+.study-disclosure .history-heading { justify-content: flex-end; }
+
 @media (max-width: 900px) {
   .header-note { display: none; }
   .workspace { grid-template-columns: 260px minmax(0, 1fr); gap: 25px; }
@@ -174,9 +187,6 @@ footer a { color: #6c7d5e; text-underline-offset: 3px; }
   .brand { font-size: 20px; }
   .level { font-size: 8px; letter-spacing: 1px; }
   main { padding: 0 20px; }
-  .intro { padding: 38px 0 30px; }
-  h1 { font-size: 39px; }
-  .intro-copy { font-size: 12px; }
   .workspace { grid-template-columns: 1fr; gap: 28px; padding-top: 25px; }
   .study-panel h2 { margin: 15px 0 20px; }
   .suggestions { margin-top: 23px; padding-top: 20px; }
@@ -193,4 +203,41 @@ footer a { color: #6c7d5e; text-underline-offset: 3px; }
   .bottom-note p { font-size: 13px; }
   .bottom-note p span { display: inline-block; font-size: 9px; max-width: 200px; }
   footer { flex-direction: column; align-items: center; text-align: center; line-height: 1.8; }
+
+  /* Keep selection compact so the stroke and handwriting areas are easy to reach. */
+  .site-header { height: auto; min-height: 64px; gap: 8px; padding: 10px 16px; }
+  .level { text-align: right; line-height: 1.6; }
+  .level span { padding: 0 3px; }
+  main { padding: 0 16px; }
+  .workspace { gap: 16px; padding: 20px 0 24px; }
+  .study-panel { display: contents; }
+  .study-panel > * { order: 1; }
+  .drawing-panel { order: 2; }
+  .study-panel > .suggestions { order: 3; }
+  .study-panel > .history, .study-panel > .sessions { order: 4; }
+  .study-panel h2 { margin: 0; }
+  .study-panel .character-list { margin-top: 0; }
+  .input-wrap { min-height: 50px; }
+  .submit-button { min-width: 44px; }
+  .suggestions { margin-top: 18px; padding-top: 16px; }
+  .preset-list { gap: 8px; }
+  .preset { min-height: 108px; padding: 12px; gap: 6px; }
+  .preset > span:first-child { min-width: 0; font-size: 28px; }
+  .preset > span:nth-child(2) { font-size: 12px; }
+  .preset small { font-size: 10px; }
+  .drawing-panel { padding: 18px 16px; }
+  .drawing-heading h2 { flex-wrap: wrap; }
+  .sheet, .practice-sheet { width: min(100%, 360px); margin-left: auto; margin-right: auto; }
+  .playback { flex-wrap: wrap; gap: 8px; }
+  .icon-button, .play-button, .text-button, .retry { min-height: 44px; }
+  .icon-button { min-width: 44px; }
+  .play-button { flex: 1; min-width: 120px; }
+  .speed-label { font-size: 11px; }
+  select { min-height: 44px; max-width: 150px; padding: 8px; font-size: 14px; }
+  .display-options { font-size: 12px; }
+  .display-options label { min-height: 44px; }
+  input[type="checkbox"] { width: 18px; height: 18px; }
+  .helper { font-size: 12px; }
+  .practice-panel { padding: 24px 0; }
+  .practice-actions .text-button { font-size: 13px; }
 }

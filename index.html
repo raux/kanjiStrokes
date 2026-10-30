@@ -17,12 +17,6 @@
   </header>
 
   <main>
-    <section class="intro">
-      <p class="eyebrow"><span></span> THE ART OF REMEMBERING</p>
-      <h1>One character.<br><em>One stroke at a time.</em></h1>
-      <p class="intro-copy">Make room for a little Japanese. Explore a kanji,<br class="desktop-break"> follow the ink, and let your hand remember.</p>
-    </section>
-
     <div class="workspace">
       <aside class="study-panel" aria-label="Choose characters">
         <div class="section-label"><span>01</span> YOUR CHARACTERS</div>
@@ -37,24 +31,26 @@
         </form>
         <p id="input-error" class="error" role="alert"></p>
         <div id="character-list" class="character-list" role="group" aria-label="Characters to study"></div>
-        <div class="history">
+        <details class="history study-disclosure">
+          <summary>Recently studied</summary>
           <div class="history-heading">
             <div class="section-label">RECENTLY STUDIED</div>
             <button id="history-clear" class="text-button danger" type="button" hidden>Clear history</button>
           </div>
           <div id="history-list" class="character-list history-list" role="group" aria-label="Previously studied kanji"></div>
           <p id="history-empty" class="helper">Kanji you study will gather here, ready to revisit.</p>
-        </div>
-        <div class="sessions">
+        </details>
+        <details class="sessions study-disclosure">
+          <summary>Saved lists</summary>
           <div class="history-heading">
             <div class="section-label">SAVED LISTS</div>
             <button id="session-save" class="text-button" type="button" disabled>Save this set</button>
           </div>
           <ul id="session-list" class="session-list" aria-label="Saved kanji lists"></ul>
           <p id="session-empty" class="helper">Save a set of kanji to come back to it in a future session.</p>
-        </div>
+        </details>
         <div class="suggestions">
-          <div class="section-label">A LITTLE N1 INSPIRATION</div>
+          <div class="section-label">CHOOSE A KANJI CARD</div>
           <div class="preset-list">
             <button type="button" class="preset" data-word="憂"><span lang="ja">憂</span><span>Melancholy<small>ゆう · うれえる</small></span><span class="preset-arrow">↗</span></button>
             <button type="button" class="preset" data-word="響"><span lang="ja">響</span><span>Resonance<small>きょう · ひびく</small></span><span class="preset-arrow">↗</span></button>
