@@ -20,6 +20,7 @@
     <div class="study-tabs" role="tablist" aria-label="Study mode">
       <button id="learn-tab" class="study-tab" type="button" role="tab" aria-selected="true" aria-controls="learn-panel">Learn</button>
       <button id="practice-tab" class="study-tab" type="button" role="tab" aria-selected="false" aria-controls="practice-panel" tabindex="-1">Practice</button>
+      <button id="text-tab" class="study-tab" type="button" role="tab" aria-selected="false" aria-controls="text-panel" tabindex="-1">Text</button>
     </div>
     <div class="workspace" id="learn-panel" role="tabpanel" aria-labelledby="learn-tab">
       <aside class="study-panel" aria-label="Choose characters">
@@ -153,6 +154,26 @@
           <p class="helper">Practice recordings never leave this device. Replays show your own strokes, not a graded result.</p>
         </div>
       </div>
+    </section>
+
+    <section id="text-panel" class="text-study" role="tabpanel" aria-labelledby="text-tab" hidden>
+      <h2>Text study</h2>
+      <label for="text-input">Paste Japanese text</label>
+      <textarea id="text-input" rows="6" maxlength="10000" placeholder="ここに日本語を貼り付けてください"></textarea>
+      <p class="helper">Analysis runs on this device. The tokenizer and dictionary are downloaded on first use; selecting kanji may also request their stroke data and meanings from existing services.</p>
+      <div class="practice-actions"><button id="text-analyze" class="text-button strong" type="button">Analyze text</button><button id="text-clear" class="text-button" type="button">Clear</button></div>
+      <p id="text-status" role="status" aria-live="polite"></p>
+      <div id="text-results" hidden>
+        <h2>Contextual reading</h2>
+        <p class="helper">Best-effort word readings; unknown words are marked. Readings can be ambiguous. Tap a kanji to select it for your study list.</p>
+        <p class="frequency-legend"><span class="legend-swatch frequency-1"></span> Less frequent <span class="legend-swatch frequency-2"></span> <span class="legend-swatch frequency-3"></span> More frequent <span id="frequency-range"></span></p>
+        <div id="text-furigana" class="furigana" lang="ja"></div>
+        <h2>Kanji frequency</h2>
+        <p class="helper">Readings are possible individual-kanji readings, not necessarily those used above. Select up to 20.</p>
+        <div class="practice-actions"><button id="text-top" class="text-button" type="button">Select top 5</button><button id="text-study" class="text-button strong" type="button" disabled>Add to study list (0 selected)</button></div>
+        <div id="text-ranking" class="text-ranking"></div>
+      </div>
+      <p class="helper">Tokenizer: kuromoji.js / IPADIC. Kanji data: Kanji Data, based on KANJIDIC and other sources. See README for attribution.</p>
     </section>
 
     <section class="bottom-note"><span lang="ja">日々精進</span><p>Small steps. Lasting impressions.<br><span>A few thoughtful strokes today, a little more confidence tomorrow.</span></p></section>

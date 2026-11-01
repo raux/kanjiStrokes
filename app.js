@@ -966,7 +966,7 @@ $("#practice-remember").addEventListener("click", () => {
 });
 
 // Keep both panels mounted so switching tabs preserves the current work.
-const studyTabs = [$("#learn-tab"), $("#practice-tab")];
+const studyTabs = [$("#learn-tab"), $("#practice-tab"), $("#text-tab")];
 function selectStudyTab(tab, focus = false) {
   for (const item of studyTabs) {
     const selected = item === tab;
@@ -983,11 +983,134 @@ for (const tab of studyTabs) {
     if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
     event.preventDefault();
     const next = event.key === "Home" ? studyTabs[0]
-      : event.key === "End" ? studyTabs[1]
-      : studyTabs[1 - studyTabs.indexOf(tab)];
+      : event.key === "End" ? studyTabs[studyTabs.length - 1]
+      : studyTabs[(studyTabs.indexOf(tab) + (event.key === "ArrowRight" ? 1 : -1) + studyTabs.length) % studyTabs.length];
     selectStudyTab(next, true);
   });
 }
+// Text analysis runs in a worker; no passage text is sent to dictionary servers.
+let textWorker = null;
+let textRequest = 0;
+let textRanking = [];
+const textSelection = new Set();
+function refreshTextSelection() {
+  const button = $("#text-study");
+  button.disabled = textSelection.size === 0;
+  button.textContent = `Add to study list (${textSelection.size} selected)`;
+  $("#text-ranking").querySelectorAll('input[type="checkbox"]').forEach(input => { input.checked = textSelection.has(input.value); });
+  $("#text-furigana").querySelectorAll(".frequency-kanji").forEach(item => {
+    item.setAttribute("aria-pressed", String(textSelection.has(item.dataset.kanji)));
+  });
+}
+function setTextSelection(character, selected) {
+  if (selected) {
+    const merged = new Set([...sessionCurrent, ...textSelection, character]);
+    if (merged.size > MAX_CHARACTERS) {
+      $("#text-status").textContent = `Your study list can contain up to ${MAX_CHARACTERS} kanji. Remove characters before adding more.`;
+      refreshTextSelection();
+      return;
+    }
+    textSelection.add(character);
+  } else textSelection.delete(character);
+  refreshTextSelection();
+}
+function renderTextResults(result) {
+  textRanking = result.ranking;
+  textSelection.clear();
+  refreshTextSelection();
+  const reading = $("#text-furigana");
+  reading.replaceChildren();
+  const frequencies = new Map(textRanking.map(item => [item.character, item.count]));
+  const counts = [...frequencies.values()];
+  const min = counts.length ? Math.min(...counts) : 0;
+  const max = counts.length ? Math.max(...counts) : 0;
+  $("#frequency-range").textContent = counts.length ? `In this text: ${min}–${max} occurrences.` : "No kanji in this text.";
+  function appendSurface(parent, surface) {
+    for (const character of surface) {
+      if (!frequencies.has(character)) { parent.append(document.createTextNode(character)); continue; }
+      const count = frequencies.get(character);
+      const level = max === min ? 1 : Math.min(3, 1 + Math.floor((count - min) * 3 / (max - min)));
+      const button = document.createElement("button");
+      button.type = "button"; button.className = `frequency-kanji frequency-${level}`;
+      button.dataset.kanji = character; button.textContent = character;
+      button.setAttribute("aria-label", `${character}, ${count} ${count === 1 ? "occurrence" : "occurrences"}. Toggle selection`);
+      button.setAttribute("aria-pressed", "false");
+      button.addEventListener("click", () => setTextSelection(character, !textSelection.has(character)));
+      parent.append(button);
+    }
+  }
+  for (const token of result.tokens) {
+    if (token.reading && /\p{Unified_Ideograph}/u.test(token.surface) && !token.unknown) {
+      const ruby = document.createElement("ruby");
+      appendSurface(ruby, token.surface);
+      const rt = document.createElement("rt"); rt.textContent = token.reading; ruby.append(rt);
+      reading.append(ruby);
+    } else {
+      const span = document.createElement("span");
+      appendSurface(span, token.surface);
+      if (token.unknown) { span.className = "unknown-token"; span.title = "Reading unavailable"; }
+      reading.append(span);
+    }
+  }
+  const ranking = $("#text-ranking");
+  ranking.replaceChildren();
+  for (const item of textRanking) {
+    const label = document.createElement("label"); label.className = "text-result";
+    const input = document.createElement("input"); input.type = "checkbox"; input.value = item.character;
+    input.addEventListener("change", () => setTextSelection(item.character, input.checked));
+    const detail = document.createElement("span");
+    const title = document.createElement("strong"); title.textContent = `${item.rank}. ${item.character} — ${item.count} ${item.count === 1 ? "occurrence" : "occurrences"}`;
+    const meaning = document.createElement("span"); meaning.textContent = item.meaning || "Meaning unavailable";
+    const reading = document.createElement("span"); reading.lang = "ja"; reading.textContent = item.reading || "Reading unavailable";
+    detail.append(title, meaning, reading); label.append(input, detail); ranking.append(label);
+  }
+  $("#text-results").hidden = false;
+  const total = textRanking.reduce((sum, item) => sum + item.count, 0);
+  $("#text-status").textContent = `${total} kanji occurrences · ${textRanking.length} unique kanji`;
+}
+$("#text-analyze").addEventListener("click", () => {
+  const text = $("#text-input").value;
+  if (!text.trim()) { $("#text-status").textContent = "Paste some text first."; return; }
+  if (!textWorker) {
+    textWorker = new Worker("./text-worker.js");
+    textWorker.onmessage = ({ data }) => {
+      if (data.id !== textRequest) return;
+      $("#text-analyze").disabled = false;
+      if (data.error) { $("#text-status").textContent = `Analysis unavailable: ${data.error}. Check your connection and retry.`; return; }
+      renderTextResults(data);
+    };
+    textWorker.onerror = () => {
+      textWorker.terminate(); textWorker = null;
+      $("#text-analyze").disabled = false;
+      $("#text-status").textContent = "Analysis could not start. Check your connection and retry.";
+    };
+  }
+  $("#text-results").hidden = true;
+  $("#text-analyze").disabled = true;
+  $("#text-status").textContent = "Loading dictionaries and analyzing…";
+  textWorker.postMessage({ id: ++textRequest, text });
+});
+$("#text-clear").addEventListener("click", () => {
+  textRequest++; $("#text-input").value = ""; $("#text-results").hidden = true;
+  $("#text-status").textContent = ""; $("#text-analyze").disabled = false;
+  textRanking = []; textSelection.clear(); refreshTextSelection();
+});
+$("#text-top").addEventListener("click", () => {
+  textSelection.clear();
+  for (const item of textRanking.slice(0, 5)) {
+    if (new Set([...sessionCurrent, ...textSelection, item.character]).size <= MAX_CHARACTERS) textSelection.add(item.character);
+  }
+  refreshTextSelection();
+});
+$("#text-study").addEventListener("click", () => {
+  const selected = textRanking.filter(item => textSelection.has(item.character));
+  if (!selected.length) return;
+  for (const item of selected) if (item.meaning && !knownMeaning(item.character)) meaningsCache[item.character] = { meaning: item.meaning, reading: item.reading };
+  const characters = [...new Set([...sessionCurrent, ...selected.map(item => item.character)])].join("");
+  $("#characters").value = characters;
+  study(characters);
+  selectStudyTab($("#learn-tab"), true);
+});
 window.addEventListener("resize", practiceResizeCanvas);
 practiceResizeCanvas();
 

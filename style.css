@@ -34,6 +34,28 @@ main { max-width: 1110px; margin: auto; padding: 0 40px; }
 .study-tab { min-width: 110px; min-height: 48px; padding: 10px 20px; border: 0; border-bottom: 3px solid transparent; background: transparent; color: #667060; font-weight: 600; }
 .study-tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
 .study-tab:hover { background: #e9ecdf; }
+.text-study { padding: 20px 0 32px; max-width: 740px; }
+.text-study textarea { display: block; width: 100%; margin-top: 8px; padding: 12px; border: 1px solid #d5d8c8; border-radius: 8px; background: #fffdf7; color: var(--ink); font: 16px/1.6 "Yuji Boku", "Noto Serif JP", serif; resize: vertical; }
+.text-study label { font-size: 14px; }
+#text-status { min-height: 1.5em; }
+.furigana { padding: 24px 16px 12px; line-height: 3; overflow-wrap: anywhere; background: #fffdf7; border: 1px solid var(--line); border-radius: 8px; font-size: 20px; }
+.furigana rt { font-size: 12px; }
+.frequency-legend { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; color: #4b5546; font-size: 12px; }
+.legend-swatch { width: 16px; height: 16px; border-radius: 3px; border: 1px solid #a8b19c; }
+.frequency-1 { background: #e7efd9; }
+.frequency-2 { background: #c2d79f; }
+.frequency-3 { background: #91b56b; }
+.frequency-kanji { display: inline; min-width: 1.15em; padding: 1px 2px; border: 0; border-radius: 3px; color: #1c3018; font: inherit; line-height: inherit; }
+.frequency-kanji[aria-pressed="true"] { outline: 2px solid #a64f3c; outline-offset: 1px; }
+.frequency-kanji:focus-visible { outline: 3px solid #593d9c; outline-offset: 2px; }
+#frequency-range { margin-left: 4px; }
+.unknown-token { text-decoration: underline dotted var(--accent); }
+.text-ranking { display: grid; gap: 8px; margin-top: 14px; }
+.text-result { display: flex; align-items: center; gap: 12px; padding: 12px; background: #fffdf7; border: 1px solid var(--line); border-radius: 8px; }
+.text-result input { flex: none; width: 20px; height: 20px; }
+.text-result span span, .text-result strong { display: block; line-height: 1.5; }
+.text-result span[lang="ja"] { font-size: 16px; }
+@media (max-width: 680px) { .study-tab { min-width: 0; padding-inline: 8px; } }
 .study-tab:focus-visible { outline-offset: -3px; }
 .section-label { font-size: 10px; font-weight: 600; letter-spacing: 1.8px; }
 .workspace { display: grid; grid-template-columns: 315px minmax(0, 1fr); gap: 60px; padding: 35px 0 40px; border-top: 1px solid var(--line); }
@@ -93,7 +115,7 @@ input[type="text"], input:not([type]) { min-width: 0; width: 100%; padding: 5px 
 .drawing-heading h2 { display: flex; align-items: center; gap: 13px; margin: 12px 0 3px; }
 #current-character { font: 30px "Noto Serif JP", serif; }
 #character-meaning { font: 17px Georgia, serif; }
-#character-reading { color: #878b7d; font-size: 10px; margin: 4px 0 0; min-height: 15px; }
+#character-reading { color: #667060; font-size: 16px; line-height: 1.5; margin: 4px 0 0; min-height: 24px; }
 .stroke-count { white-space: nowrap; border: 1px solid #dfe3d3; border-radius: 20px; padding: 6px 10px; background: #eff1e7; color: #738264; font-size: 10px; }
 .sheet { position: relative; margin: 20px auto 0; width: min(100%, 360px); aspect-ratio: 1; background: #fffdf7; border: 1px solid #e4e2d7; }
 #canvas { width: 100%; height: 100%; display: block; padding: 15px; }
@@ -186,7 +208,7 @@ h2, #character-meaning, .practice-note p, .practice-note p span,
 .tarot-ornament { display: block; color: var(--accent); }
 .tarot-word { display: block; font: 32px "Yuji Boku", "Noto Serif JP", serif; color: #59694c; }
 .tarot-card strong, .tarot-reading { display: block; font-size: 12px; }
-.tarot-reading { margin-top: 4px; color: #667060; }
+.tarot-reading { margin-top: 4px; color: #667060; font-size: 16px; line-height: 1.5; }
 .tarot-card p { margin: 10px 0 0; font: italic 13px/1.5 "Noteworthy", "Segoe Print", system-ui, sans-serif; }
 .tarot-study { min-height: 44px; margin-top: 14px; }
 @keyframes tarot-reveal { from { opacity: 0; transform: translateY(8px); } }

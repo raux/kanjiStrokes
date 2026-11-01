@@ -31,7 +31,7 @@ jobs:
       - name: Prepare static site
         run: |
           mkdir _site
-          cp index.html style.css app.js game.html _site/
+          cp index.html style.css app.js text-worker.js game.html _site/
           cp -R data game _site/
           touch _site/.nojekyll
       - name: Upload site

@@ -18,6 +18,14 @@ Then open [http://localhost:8000](http://localhost:8000).
 
 No install or build step is needed. Serve the directory over HTTP rather than opening `index.html` directly, so the browser can fetch SVG data.
 
+## Text study
+
+The Text tab ranks individual kanji by frequency and shows best-effort contextual word readings in hiragana. In the contextual reading, darker highlights indicate more frequent kanji; tap a kanji or select it in the ranking to add it to your existing study list (up to 20 characters) for Learn and Practice. Use Saved lists to keep the list. Unknown words are marked, and individual readings are possible readings rather than contextual pronunciations. Contextual word meanings are not yet provided.
+
+Analysis runs in a browser worker: the pasted passage is not sent to the dictionary hosts or saved by the feature. On first use it downloads kuromoji.js 0.1.2 and its IPADIC dictionary from jsDelivr and kanji-data from a pinned GitHub revision via jsDelivr. This requires a network connection; substantial dictionary downloads can be slow on mobile. Studying selected characters may request their stroke data from GitHub and, when meanings are missing, individual characters from kanjiapi.dev, as in the existing study flow.
+
+Tokenizer: [kuromoji.js](https://github.com/takuyaa/kuromoji.js), Apache-2.0, with IPADIC dictionary. Kanji data: [Kanji Data](https://github.com/davidluzgouveia/kanji-data), MIT, derived from KANJIDIC and other sources; see upstream attribution and [EDRDG licence](https://www.edrdg.org/edrdg/licence.html). Data is downloaded from its provider, not redistributed in this repository.
+
 ## Practice data and privacy
 
 - Handwriting capture happens only inside the practice panel’s writing area; the app does not record general keyboard input.
