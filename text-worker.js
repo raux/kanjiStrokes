@@ -2,6 +2,17 @@
 const CDN = "https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/";
 const KANJI_DATA = "https://cdn.jsdelivr.net/gh/davidluzgouveia/kanji-data@00fd7079c3890f430759536f91aa5e854ec0ca4f/kanji.json";
 let resources;
+// kuromoji's path.join collapses https:// into https:/ before opening each
+// dictionary file. Repair only its pinned CDN prefix inside this worker.
+const malformedDictionaryPrefix = "https:/cdn.jsdelivr.net/npm/kuromoji@0.1.2/dict/";
+const correctDictionaryPrefix = `${CDN}dict/`;
+const originalOpen = XMLHttpRequest.prototype.open;
+XMLHttpRequest.prototype.open = function (method, url, ...args) {
+  const fixed = typeof url === "string" && url.startsWith(malformedDictionaryPrefix)
+    ? correctDictionaryPrefix + url.slice(malformedDictionaryPrefix.length)
+    : url;
+  return originalOpen.call(this, method, fixed, ...args);
+};
 function loadResources() {
   if (!resources) resources = (async () => {
     importScripts(`${CDN}build/kuromoji.js`);

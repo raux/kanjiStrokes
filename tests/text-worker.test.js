@@ -8,6 +8,7 @@ async function analyze(text, tokens, dictionary = {}) {
   let result;
   const context = {
     importScripts() {},
+    XMLHttpRequest: class { open() {} },
     kuromoji: { builder: () => ({ build: callback => callback(null, { tokenize: () => tokens }) }) },
     fetch: async () => ({ ok: true, json: async () => dictionary }),
     self: { postMessage: message => { result = message; } },
@@ -16,6 +17,18 @@ async function analyze(text, tokens, dictionary = {}) {
   await context.self.onmessage({ data: { id: 7, text } });
   return result;
 }
+
+test('repairs kuromoji dictionary URLs without rewriting unrelated requests', () => {
+  const source = readFileSync(new URL('../text-worker.js', import.meta.url), 'utf8');
+  class FakeXHR { open(method, url) { this.url = url; } }
+  const context = { XMLHttpRequest: FakeXHR, self: {} };
+  vm.runInNewContext(source, context);
+  const request = new FakeXHR();
+  request.open('GET', 'https:/cdn.jsdelivr.net/npm/kuromoji@0.1.2/dict/base.dat.gz');
+  assert.equal(request.url, 'https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/dict/base.dat.gz');
+  request.open('GET', 'https://example.com/test');
+  assert.equal(request.url, 'https://example.com/test');
+});
 
 test('ranks kanji by count with competition ties and first-appearance order', async () => {
   const result = await analyze('学校学生日', [], { '学': { meanings: ['study'], readings_on: ['ガク'] } });

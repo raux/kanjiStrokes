@@ -87,6 +87,33 @@ function entryFor(floor, char) {
   return floor.pool.find(entry => entry.char === char) || null;
 }
 
+// Saved-list runs use individual characters only, without invented word encounters.
+export function generateSavedRun(seed, pools, entries) {
+  if (!Array.isArray(entries) || !entries.length || entries.length > 20 || entries.some(entry =>
+    !entry || typeof entry.char !== "string" || [...entry.char].length !== 1 ||
+    !(/\p{Unified_Ideograph}/u.test(entry.char) || entry.char === "々"))) {
+    throw new Error("Saved list must contain 1–20 valid characters.");
+  }
+  const problems = validatePools(pools);
+  if (problems.length) throw new Error(`invalid pools: ${problems[0]}`);
+  const rng = mulberry32(seed >>> 0);
+  const floors = pools.floors.map(floor => {
+    const encounters = [];
+    while (encounters.length < NORMALS_PER_FLOOR) {
+      const shuffled = samplePool(entries, entries.length, rng);
+      for (const entry of shuffled) {
+        if (encounters.length === NORMALS_PER_FLOOR) break;
+        encounters.push({ kind: "normal", mode: floor.mode, char: entry.char,
+          reading: typeof entry.reading === "string" ? entry.reading : "",
+          meaning: typeof entry.meaning === "string" ? entry.meaning : "" });
+      }
+    }
+    return { depth: floor.depth, name: floor.name, glyph: floor.glyph,
+      mode: floor.mode, bundledOnly: false, encounters };
+  });
+  return { seed: seed >>> 0, source: "saved-list", floors };
+}
+
 // Build a deterministic run layout from a 32-bit seed and validated pools.
 export function generateRun(seed, pools) {
   const problems = validatePools(pools);

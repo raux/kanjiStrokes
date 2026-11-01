@@ -4,7 +4,7 @@
 "use strict";
 
 import { scoreStroke } from "./scorer.js";
-import { generateRun, hashSeed, dailySeed, mulberry32 } from "./floors.js";
+import { generateRun, generateSavedRun, hashSeed, dailySeed, mulberry32 } from "./floors.js";
 import {
   createRun, currentFloor, currentEncounter, currentCharacter,
   beginCharacter, applyStroke, retreat, revealGuide, payForReplay,
@@ -36,6 +36,8 @@ let pointerId = null;
 let inputLocked = true;
 let guideTimer = 0;
 let fallbackNoticeShown = false;
+let savedListRun = false;
+let missingStrokeData = false;
 
 /* ---------- small helpers ---------- */
 
@@ -338,7 +340,8 @@ function renderEncounterBrief() {
   if (!encounter || !character) return;
   const kindLabel = { normal: "ENCOUNTER", ghost: "GHOST · RETURNED HARDER", elite: "ELITE · WORD", boss: "BOSS · FROM MEANING ALONE" }[encounter.kind];
   $("#enc-kind").textContent = `${kindLabel} · ${encounter.mode.toUpperCase()}`;
-  const showChar = encounter.mode === "copy" || encounter.mode === "trace";
+  // Without a meaning there is no fair recall cue, so keep the character visible.
+  const showChar = encounter.mode === "copy" || encounter.mode === "trace" || (savedListRun && !character.meaning);
   if (encounter.word) {
     const written = encounter.chars.map((entry, index) =>
       index < encounter.charIndex ? entry.char : showChar ? entry.char : "〓").join("");
@@ -366,6 +369,8 @@ async function startCharacter() {
   const character = currentCharacter(state);
   if (!character) return;
   inputLocked = true;
+  missingStrokeData = false;
+  $("#btn-retry-stroke").hidden = true;
   landedStrokes.length = 0;
   drawnIndex = 0;
   refStrokes = [];
@@ -376,7 +381,14 @@ async function startCharacter() {
   try {
     entry = await loadCharacter(character.char);
   } catch {
-    // Swap in a bundled fallback so the run survives offline.
+    if (savedListRun) {
+      missingStrokeData = true;
+      $("#btn-retry-stroke").hidden = false;
+      renderAll();
+      setStatus(`Stroke data for ${character.char} is unavailable. Retry or retreat (retreat costs resolve).`);
+      return;
+    }
+    // Default runs retain their bundled offline fallback.
     const fallback = bundledFallback();
     const encounter = currentEncounter(state);
     if (!encounter.word) {
@@ -526,7 +538,9 @@ $("#btn-replay-ref").addEventListener("click", () => {
 });
 
 $("#btn-retreat").addEventListener("click", () => {
-  if (state.status !== "playing" || inputLocked) return;
+  if (state.status !== "playing" || (inputLocked && !missingStrokeData)) return;
+  missingStrokeData = false;
+  $("#btn-retry-stroke").hidden = true;
   const encounter = currentEncounter(state);
   retreat(state);
   inputLocked = true;
@@ -579,6 +593,35 @@ function endRun() {
   show("#screen-end");
 }
 
+function loadSavedLists() {
+  try {
+    const value = JSON.parse(localStorage.getItem("kanjiStrokes.sessions.v1"));
+    if (!Array.isArray(value)) return [];
+    return value.filter(entry => entry && typeof entry.id === "string" && typeof entry.name === "string" &&
+      Array.isArray(entry.characters) && entry.characters.length > 0 && entry.characters.length <= 20 &&
+      entry.characters.every(char => typeof char === "string" && [...char].length === 1 && (/\p{Unified_Ideograph}/u.test(char) || char === "々")));
+  } catch { return []; }
+}
+function refreshDungeonSources() {
+  const source = $("#dungeon-source");
+  const previous = source.value;
+  const standard = document.createElement("option"); standard.value = "default"; standard.textContent = "Default dungeon";
+  const options = loadSavedLists().map(list => {
+    const option = document.createElement("option"); option.value = list.id; option.textContent = list.name; return option;
+  });
+  source.replaceChildren(standard, ...options);
+  source.value = options.some(option => option.value === previous) ? previous : "default";
+}
+function savedEntries(list) {
+  let cache = {};
+  try { cache = JSON.parse(localStorage.getItem("kanjiStrokes.meanings.v1")) || {}; } catch { /* no cached meanings */ }
+  const known = new Map(pools.floors.flatMap(floor => floor.pool.map(entry => [entry.char, entry])));
+  return [...new Set(list.characters)].map(char => {
+    const data = known.get(char) || cache[char] || {};
+    return { char, reading: typeof data.reading === "string" ? data.reading : "", meaning: typeof data.meaning === "string" ? data.meaning : "" };
+  });
+}
+
 async function startRun(seed) {
   try {
     if (!pools) {
@@ -590,7 +633,15 @@ async function startRun(seed) {
     $("#start-error").textContent = "The floor pools could not be loaded. Serve the site over HTTP and try again.";
     return;
   }
-  state = createRun(generateRun(seed, pools));
+  const source = $("#dungeon-source").value;
+  const list = source === "default" ? null : loadSavedLists().find(entry => entry.id === source);
+  if (source !== "default" && !list) {
+    $("#start-error").textContent = "That saved list is no longer available. Choose another source.";
+    refreshDungeonSources();
+    return;
+  }
+  savedListRun = Boolean(list);
+  state = createRun(list ? generateSavedRun(seed, pools, savedEntries(list)) : generateRun(seed, pools));
   fallbackNoticeShown = false;
   show("#screen-run");
   resizeCanvas();
@@ -623,6 +674,9 @@ function renderBestiary() {
 
 /* ---------- start screen wiring ---------- */
 
+refreshDungeonSources();
+window.addEventListener("storage", event => { if (event.key === "kanjiStrokes.sessions.v1") refreshDungeonSources(); });
+$("#btn-retry-stroke").addEventListener("click", () => { if (missingStrokeData) startCharacter(); });
 $("#seed-input").value = String(dailySeed());
 $("#btn-daily").addEventListener("click", () => { $("#seed-input").value = String(dailySeed()); });
 $("#btn-random").addEventListener("click", () => { $("#seed-input").value = String(Math.floor(mulberry32(Date.now() >>> 0)() * 0xffffffff) >>> 0); });
@@ -640,6 +694,7 @@ $("#btn-clear-dungeon").addEventListener("click", () => {
 $("#btn-new-run").addEventListener("click", () => {
   document.body.dataset.depth = "0";
   renderBestiary();
+  refreshDungeonSources();
   show("#screen-start");
 });
 

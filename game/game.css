@@ -50,6 +50,7 @@ body[data-depth="3"] footer a, body[data-depth="4"] footer a, body[data-depth="5
 .game-screen { padding-bottom: 30px; }
 .start-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 50px; border-top: 1px solid var(--line); padding-top: 35px; }
 .start-panel .section-label { margin-bottom: 18px; }
+.dungeon-source { width: 100%; max-width: 100%; min-height: 44px; margin-top: 6px; padding: 8px 10px; border: 1px solid #d5d8c8; border-radius: 6px; background: #fffdf7; font-size: 14px; }
 .seed-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
 #seed-input { width: 130px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 4px; background: transparent; color: var(--ink); font: 15px ui-monospace, monospace; }
 .start-button { margin-top: 20px; }

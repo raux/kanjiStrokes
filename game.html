@@ -31,6 +31,9 @@
       <div class="start-grid">
         <div class="start-panel">
           <p class="section-label"><span>01</span> BEGIN A DESCENT</p>
+          <label class="helper" for="dungeon-source">Kanji source</label>
+          <select id="dungeon-source" class="dungeon-source"><option value="default">Default dungeon</option></select>
+          <p class="helper">Saved-list runs use individual kanji across five floors, without word elites or a boss. Stroke data may require a connection.</p>
           <label class="helper" for="seed-input">Run seed</label>
           <div class="seed-row">
             <input id="seed-input" inputmode="numeric" autocomplete="off" spellcheck="false" aria-describedby="seed-help">
@@ -114,6 +117,7 @@
               <canvas id="game-canvas" tabindex="0" role="img" aria-label="Writing area" aria-describedby="game-status"></canvas>
             </div>
             <p id="game-status" class="helper practice-status" aria-live="polite">Preparing the floor…</p>
+            <button id="btn-retry-stroke" class="text-button" type="button" hidden>Retry loading stroke data</button>
           </div>
         </div>
       </div>
