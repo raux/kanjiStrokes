@@ -494,6 +494,7 @@ function sessionsRender() {
   const empty = $("#session-empty");
   empty.hidden = sessionsList.length > 0;
   empty.textContent = "Save a set of kanji to come back to it in a future session.";
+  syncTarotSources();
 }
 
 $("#session-save").addEventListener("click", () => {
@@ -521,7 +522,61 @@ $("#session-save").addEventListener("click", () => {
   if (!persisted) sessionNote(`“${name}” is kept on this page, but this browser could not save it for future sessions.`);
 });
 
-sessionsRender();
+/* Saved-list backups contain lists only, never handwriting attempts. */
+const SESSION_BACKUP_FORMAT = "kanjiStrokes.saved-lists";
+const SESSION_BACKUP_MAX_BYTES = 1024 * 1024;
+function mergeSessionBackup(existing, backup) {
+  if (!backup || backup.format !== SESSION_BACKUP_FORMAT || backup.version !== 1 || !Array.isArray(backup.lists)) {
+    throw new Error("This is not a supported saved-list backup.");
+  }
+  const merged = [...existing];
+  const keys = new Set(existing.map(entry => entry.characters.join("")));
+  let added = 0, duplicates = 0, invalid = 0, full = 0;
+  for (const entry of backup.lists) {
+    if (!entry || typeof entry.name !== "string" || !entry.name.trim() || entry.name.length > SESSION_NAME_MAX ||
+        !Array.isArray(entry.characters) || !entry.characters.length || entry.characters.length > MAX_CHARACTERS ||
+        !entry.characters.every(sessionValidCharacter) || new Set(entry.characters).size !== entry.characters.length) {
+      invalid++; continue;
+    }
+    const key = entry.characters.join("");
+    if (keys.has(key)) { duplicates++; continue; }
+    if (merged.length >= SESSIONS_MAX) { full++; continue; }
+    keys.add(key);
+    merged.push({
+      id: globalThis.crypto?.randomUUID ? `session-${globalThis.crypto.randomUUID()}` : `session-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      name: entry.name.trim(),
+      characters: [...entry.characters],
+      createdAt: typeof entry.createdAt === "string" && !Number.isNaN(Date.parse(entry.createdAt)) ? entry.createdAt : new Date().toISOString(),
+    });
+    added++;
+  }
+  return { merged, added, duplicates, invalid, full };
+}
+$("#session-export").addEventListener("click", () => {
+  const backup = { format: SESSION_BACKUP_FORMAT, version: 1, lists: sessionsList.map(({ name, characters, createdAt }) => ({ name, characters, createdAt })) };
+  const url = URL.createObjectURL(new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" }));
+  const link = document.createElement("a"); link.href = url; link.download = "kanjistrokes-saved-lists.json";
+  document.body.appendChild(link); link.click(); link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  $("#session-backup-status").textContent = `Exported ${sessionsList.length} saved list(s).`;
+});
+$("#session-import").addEventListener("click", () => $("#session-import-file").click());
+$("#session-import-file").addEventListener("change", async event => {
+  const input = event.currentTarget;
+  const file = input.files[0];
+  if (!file) return;
+  try {
+    if (file.size > SESSION_BACKUP_MAX_BYTES) throw new Error("Backup is larger than 1 MB.");
+    const result = mergeSessionBackup(sessionsList, JSON.parse(await file.text()));
+    const previous = sessionsList;
+    sessionsList = result.merged;
+    if (!sessionsSave()) { sessionsList = previous; throw new Error("Browser storage is unavailable; no lists were imported."); }
+    sessionsRender();
+    $("#session-backup-status").textContent = `Imported ${result.added}; duplicates ${result.duplicates}; invalid ${result.invalid}; over limit ${result.full}.`;
+  } catch (error) {
+    $("#session-backup-status").textContent = `Import failed: ${error instanceof SyntaxError ? "invalid JSON" : error.message}`;
+  } finally { input.value = ""; }
+});
 
 $("#character-form").addEventListener("submit", event => {
   event.preventDefault();
@@ -536,24 +591,68 @@ const tarotCards = [
 ];
 let tarotPile = [];
 let tarotCurrent = null;
+let tarotDrawId = 0;
+function resetTarot() {
+  tarotDrawId++;
+  tarotPile = [];
+  tarotCurrent = null;
+  $("#tarot-card").hidden = true;
+  $("#tarot-study").hidden = true;
+  $("#tarot-draw small").textContent = "Draw a card";
+}
+function syncTarotSources() {
+  const select = $("#tarot-source");
+  const previous = select.value || "builtin";
+  const builtin = document.createElement("option");
+  builtin.value = "builtin"; builtin.textContent = "Built-in deck";
+  const options = sessionsList.map(entry => {
+    const option = document.createElement("option");
+    option.value = entry.id; option.textContent = entry.name;
+    return option;
+  });
+  select.replaceChildren(builtin, ...options);
+  select.value = sessionsList.some(entry => entry.id === previous) ? previous : "builtin";
+  resetTarot();
+}
 function refillTarot() {
-  tarotPile = tarotCards.filter(card => card !== tarotCurrent);
+  const source = $("#tarot-source").value;
+  const list = sessionsList.find(entry => entry.id === source);
+  const cards = list ? list.characters.map(word => ({ word })) : tarotCards;
+  tarotPile = cards.filter(card => !tarotCurrent || card.word !== tarotCurrent.word);
+  if (!tarotPile.length) tarotPile = [...cards];
   for (let i = tarotPile.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [tarotPile[i], tarotPile[j]] = [tarotPile[j], tarotPile[i]];
   }
 }
-$("#tarot-draw").addEventListener("click", () => {
+$("#tarot-source").addEventListener("change", resetTarot);
+$("#tarot-draw").addEventListener("click", async () => {
   if (!tarotPile.length) refillTarot();
   tarotCurrent = tarotPile.pop();
-  $("#tarot-word").textContent = tarotCurrent.word;
-  $("#tarot-meaning").textContent = tarotCurrent.meaning;
-  $("#tarot-reading").textContent = tarotCurrent.reading;
-  $("#tarot-message").textContent = tarotCurrent.message;
+  if (!tarotCurrent) return;
+  const current = tarotCurrent;
+  const drawId = ++tarotDrawId;
+  $("#tarot-word").textContent = current.word;
+  $("#tarot-meaning").textContent = current.meaning || "Loading meaning…";
+  $("#tarot-reading").textContent = current.reading || "";
+  $("#tarot-message").textContent = current.message || "From your saved list.";
   $("#tarot-card").hidden = false;
   $("#tarot-study").hidden = false;
   $("#tarot-draw small").textContent = "Draw again";
+  if (!current.meaning) {
+    try {
+      const entry = await lookupMeaning(current.word);
+      if (drawId !== tarotDrawId) return;
+      $("#tarot-meaning").textContent = entry.meaning || "Meaning unavailable";
+      $("#tarot-reading").textContent = entry.reading || "Reading unavailable";
+    } catch {
+      if (drawId !== tarotDrawId) return;
+      $("#tarot-meaning").textContent = "Meaning unavailable";
+      $("#tarot-reading").textContent = "Reading unavailable";
+    }
+  }
 });
+sessionsRender();
 $("#tarot-study").addEventListener("click", () => {
   if (!tarotCurrent) return;
   $("#characters").value = tarotCurrent.word;

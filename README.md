@@ -6,6 +6,8 @@ Enter a kanji or paste a Japanese word, then select each character to study it. 
 
 Below the stroke-order study area, a handwriting practice panel lets you draw the selected kanji with a mouse, finger, or stylus; save an attempt; replay it at 0.5×, 1×, or 2×; and mark characters to “remember” for a quiet next-day review cue.
 
+The kanji deck can draw from its built-in playful cards or any named saved list on this device. Cards drawn from saved lists display available meanings and readings; a missing meaning is marked unavailable. The reflections on built-in cards are playful, not predictions.
+
 The examples are study suggestions, not an official JLPT vocabulary or kanji list. Non-kanji text is ignored, repeated characters are combined, and each submission accepts up to 20 distinct characters. Readings and meanings are provided for the bundled examples; other characters show stroke order only.
 
 ## Run locally
@@ -25,6 +27,10 @@ The Text tab ranks individual kanji by frequency and shows best-effort contextua
 Analysis runs in a browser worker: the pasted passage is not sent to the dictionary hosts or saved by the feature. On first use it downloads kuromoji.js 0.1.2 and its IPADIC dictionary from jsDelivr and kanji-data from a pinned GitHub revision via jsDelivr. This requires a network connection; substantial dictionary downloads can be slow on mobile. Studying selected characters may request their stroke data from GitHub and, when meanings are missing, individual characters from kanjiapi.dev, as in the existing study flow.
 
 Tokenizer: [kuromoji.js](https://github.com/takuyaa/kuromoji.js), Apache-2.0, with IPADIC dictionary. Kanji data: [Kanji Data](https://github.com/davidluzgouveia/kanji-data), MIT, derived from KANJIDIC and other sources; see upstream attribution and [EDRDG licence](https://www.edrdg.org/edrdg/licence.html). Data is downloaded from its provider, not redistributed in this repository.
+
+## Back up saved lists
+
+Open **Saved lists** and choose **Export lists** to download a JSON backup. **Import lists** merges a backup into the current browser without overwriting existing lists. Duplicates (same kanji in the same order), invalid entries and entries beyond the 20-list limit are skipped and reported. Each list may contain up to 20 distinct kanji. Files are processed locally and limited to 1 MB. Handwriting attempts and review settings are not included.
 
 ## Practice data and privacy
 
