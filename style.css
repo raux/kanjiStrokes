@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;600&family=Yuji+Boku&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;500;600&display=swap");
 
 :root {
   color-scheme: light;
@@ -7,7 +7,7 @@
   --muted: #818478;
   --accent: #a64f3c;
   --line: #dfdfd3;
-  font-family: "Noteworthy", "Segoe Print", system-ui, sans-serif;
+  font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", system-ui, sans-serif;
   color: var(--ink);
   background: var(--paper);
 }
@@ -35,7 +35,7 @@ main { max-width: 1110px; margin: auto; padding: 0 40px; }
 .study-tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
 .study-tab:hover { background: #e9ecdf; }
 .text-study { padding: 20px 0 32px; max-width: 740px; }
-.text-study textarea { display: block; width: 100%; margin-top: 8px; padding: 12px; border: 1px solid #d5d8c8; border-radius: 8px; background: #fffdf7; color: var(--ink); font: 16px/1.6 "Yuji Boku", "Noto Serif JP", serif; resize: vertical; }
+.text-study textarea { display: block; width: 100%; margin-top: 8px; padding: 12px; border: 1px solid #d5d8c8; border-radius: 8px; background: #fffdf7; color: var(--ink); font: 16px/1.6 "Noto Sans JP", "Hiragino Kaku Gothic ProN", sans-serif; resize: vertical; }
 .text-study label { font-size: 14px; }
 #text-status { min-height: 1.5em; }
 .furigana { padding: 24px 16px 12px; line-height: 3; overflow-wrap: anywhere; background: #fffdf7; border: 1px solid var(--line); border-radius: 8px; font-size: 20px; }
@@ -189,29 +189,31 @@ input[type="checkbox"] { accent-color: #748266; margin: 0; width: 12px; height: 
 footer { border-top: 1px solid var(--line); padding: 24px 6%; display: flex; justify-content: space-between; gap: 14px; color: #939889; font-size: 9px; }
 footer a { color: #6c7d5e; text-underline-offset: 3px; }
 .noscript { text-align: center; color: var(--accent); }
-/* English uses Noteworthy where installed; Japanese text uses a brush-style face.
-   The stroke-order SVG retains its original KanjiVG geometry. */
+/* Gothic for interface text and readings; Mincho for prominent kanji.
+   Stroke-order SVGs retain their original KanjiVG geometry. */
 h2, #character-meaning, .practice-note p, .practice-note p span,
-.bottom-note p, .bottom-note p span, .tarot-card p, .tarot-deck small {
-  font-family: "Noteworthy", "Segoe Print", system-ui, sans-serif;
+.bottom-note p, .bottom-note p span, .tarot-card p, .tarot-deck small,
+#character-reading, .tarot-reading {
+  font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
 }
-[lang="ja"], .chip-kanji, .session-kanji, #characters, #current-character, .completion-seal {
-  font-family: "Yuji Boku", "Hiragino Mincho ProN", "Noto Serif JP", serif;
+.seal, .chip-kanji, .session-kanji, #characters, #current-character,
+#practice-character, .completion-seal, .bottom-note > span {
+  font-family: "Noto Serif JP", "Hiragino Mincho ProN", "Yu Mincho", serif;
 }
 
 /* A touch-friendly deck and an illustrated reading card. */
 .deck-source-label { display: block; margin-top: 14px; font-size: 12px; color: #667060; }
 .deck-source { width: 100%; max-width: 100%; min-height: 44px; padding: 8px 10px; border: 1px solid #d5d8c8; border-radius: 6px; background: #fffdf7; font-size: 14px; }
 .tarot-table { display: flex; align-items: flex-start; gap: 12px; margin-top: 14px; }
-.tarot-deck { flex: 0 0 100px; min-height: 150px; padding: 10px; border: 3px solid #fffdf7; border-radius: 10px; background: repeating-linear-gradient(45deg, #667a64 0 8px, #596d58 8px 16px); color: #fffdf7; box-shadow: 3px 3px 0 #c7c9ba, 6px 6px 0 #e4e2d7; font-family: "Yuji Boku", "Noto Serif JP", serif; }
+.tarot-deck { flex: 0 0 100px; min-height: 150px; padding: 10px; border: 3px solid #fffdf7; border-radius: 10px; background: repeating-linear-gradient(45deg, #667a64 0 8px, #596d58 8px 16px); color: #fffdf7; box-shadow: 3px 3px 0 #c7c9ba, 6px 6px 0 #e4e2d7; font-family: "Noto Serif JP", "Hiragino Mincho ProN", serif; }
 .tarot-deck > span { display: block; font-size: 25px; line-height: 1.2; }
-.tarot-deck small { display: block; margin-top: 8px; font: 600 11px "Noteworthy", "Segoe Print", system-ui, sans-serif; }
+.tarot-deck small { display: block; margin-top: 8px; font: 600 11px "Noto Sans JP", "Hiragino Kaku Gothic ProN", sans-serif; }
 .tarot-card { flex: 1; min-width: 0; padding: 12px; border: 1px solid #bfae88; border-radius: 10px; background: #fffdf7; box-shadow: 0 4px 14px #343c3510; text-align: center; animation: tarot-reveal .3s ease-out; }
 .tarot-ornament { display: block; color: var(--accent); }
-.tarot-word { display: block; font: 32px "Yuji Boku", "Noto Serif JP", serif; color: #59694c; }
+.tarot-word { display: block; font: 32px "Noto Serif JP", "Hiragino Mincho ProN", serif; color: #59694c; }
 .tarot-card strong, .tarot-reading { display: block; font-size: 12px; }
 .tarot-reading { margin-top: 4px; color: #667060; font-size: 16px; line-height: 1.5; }
-.tarot-card p { margin: 10px 0 0; font: italic 13px/1.5 "Noteworthy", "Segoe Print", system-ui, sans-serif; }
+.tarot-card p { margin: 10px 0 0; font: italic 13px/1.5 "Noto Sans JP", "Hiragino Kaku Gothic ProN", sans-serif; }
 .tarot-study { min-height: 44px; margin-top: 14px; }
 @keyframes tarot-reveal { from { opacity: 0; transform: translateY(8px); } }
 @media (prefers-reduced-motion: reduce) { .tarot-card { animation: none; } }

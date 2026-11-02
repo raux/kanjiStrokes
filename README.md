@@ -32,6 +32,10 @@ Tokenizer: [kuromoji.js](https://github.com/takuyaa/kuromoji.js), Apache-2.0, wi
 
 On the Ink Dungeon start screen, choose **Default dungeon** or a named saved list as the kanji source. Saved-list runs use five single-kanji encounters per floor, repeating characters as needed; they have no word elites, boss or elite relics. The same seed and list produce the same initial layout. Kanji without an available meaning remain visible as a recall cue. Stroke data not bundled with the app requires a connection; if it cannot load, retry or retreat (retreat costs resolve). Saved lists are read from this browser and are not modified.
 
+### Listen to Japanese text
+
+In Text Study, use **Listen**, **Pause/Resume**, and **Stop** to hear the pasted passage using a Japanese voice supplied by the browser or device. Availability and quality vary; some voices may use an online service. The text is not saved by this feature. If no Japanese voice is available, check the browser or device's voice settings.
+
 ## Back up saved lists
 
 Open **Saved lists** and choose **Export lists** to download a JSON backup. **Import lists** merges a backup into the current browser without overwriting existing lists. Duplicates (same kanji in the same order), invalid entries and entries beyond the 20-list limit are skipped and reported. Each list may contain up to 20 distinct kanji. Files are processed locally and limited to 1 MB. Handwriting attempts and review settings are not included.

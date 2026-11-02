@@ -1087,6 +1087,51 @@ for (const tab of studyTabs) {
     selectStudyTab(next, true);
   });
 }
+// Japanese read-aloud uses browser/device voices; no passage is stored here.
+const speech = window.speechSynthesis;
+let speechState = "idle";
+let speechGeneration = 0;
+function updateSpeechControls() {
+  $("#speech-play").disabled = !speech || typeof SpeechSynthesisUtterance === "undefined";
+  $("#speech-pause").disabled = speechState === "idle";
+  $("#speech-stop").disabled = speechState === "idle";
+  $("#speech-pause").textContent = speechState === "paused" ? "Resume" : "Pause";
+}
+function stopTextSpeech(message = "Stopped.") {
+  speechGeneration++;
+  if (speech && speechState !== "idle") speech.cancel();
+  speechState = "idle";
+  updateSpeechControls();
+  $("#speech-status").textContent = message;
+}
+$("#speech-play").addEventListener("click", () => {
+  if (!speech || typeof SpeechSynthesisUtterance === "undefined") return;
+  const text = $("#text-input").value.trim();
+  if (!text) { $("#speech-status").textContent = "Paste some Japanese text first."; return; }
+  const voice = speech.getVoices().find(item => /^ja(?:-|$)/i.test(item.lang));
+  if (!voice) { $("#speech-status").textContent = "No Japanese voice is available yet. Check your browser or device voice settings and try again."; return; }
+  if (speechState !== "idle") stopTextSpeech("");
+  const id = ++speechGeneration;
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = "ja-JP";
+  utterance.voice = voice;
+  utterance.onend = () => { if (id === speechGeneration) stopTextSpeech("Finished reading."); };
+  utterance.onerror = () => { if (id === speechGeneration) stopTextSpeech("Could not play the Japanese voice. Check your device settings and try again."); };
+  speechState = "playing";
+  updateSpeechControls();
+  $("#speech-status").textContent = "Reading Japanese text…";
+  try { speech.speak(utterance); } catch { if (id === speechGeneration) stopTextSpeech("Could not start the Japanese voice."); }
+});
+$("#speech-pause").addEventListener("click", () => {
+  if (!speech || speechState === "idle") return;
+  if (speechState === "playing") { speech.pause(); speechState = "paused"; $("#speech-status").textContent = "Paused."; }
+  else { speech.resume(); speechState = "playing"; $("#speech-status").textContent = "Reading Japanese text…"; }
+  updateSpeechControls();
+});
+$("#speech-stop").addEventListener("click", () => stopTextSpeech());
+updateSpeechControls();
+if (!speech || typeof SpeechSynthesisUtterance === "undefined") $("#speech-status").textContent = "Text-to-speech is not supported by this browser.";
+
 // Text analysis runs in a worker; no passage text is sent to dictionary servers.
 let textWorker = null;
 let textRequest = 0;
@@ -1190,6 +1235,7 @@ $("#text-analyze").addEventListener("click", () => {
   textWorker.postMessage({ id: ++textRequest, text });
 });
 $("#text-clear").addEventListener("click", () => {
+  if (speechState !== "idle") stopTextSpeech("");
   textRequest++; $("#text-input").value = ""; $("#text-results").hidden = true;
   $("#text-status").textContent = ""; $("#text-analyze").disabled = false;
   textRanking = []; textSelection.clear(); refreshTextSelection();

@@ -170,6 +170,13 @@
       <textarea id="text-input" rows="6" maxlength="10000" placeholder="ここに日本語を貼り付けてください"></textarea>
       <p class="helper">Analysis runs on this device. The tokenizer and dictionary are downloaded on first use; selecting kanji may also request their stroke data and meanings from existing services.</p>
       <div class="practice-actions"><button id="text-analyze" class="text-button strong" type="button">Analyze text</button><button id="text-clear" class="text-button" type="button">Clear</button></div>
+      <div class="practice-actions" role="group" aria-label="Listen to Japanese text">
+        <button id="speech-play" class="text-button" type="button">▶ Listen</button>
+        <button id="speech-pause" class="text-button" type="button" disabled>Pause</button>
+        <button id="speech-stop" class="text-button" type="button" disabled>Stop</button>
+      </div>
+      <p class="helper">Japanese speech uses a voice provided by your browser or device. Some voices may use an online service.</p>
+      <p id="speech-status" class="helper" role="status" aria-live="polite"></p>
       <p id="text-status" role="status" aria-live="polite"></p>
       <div id="text-results" hidden>
         <h2>Contextual reading</h2>

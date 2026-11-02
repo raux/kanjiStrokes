@@ -81,7 +81,7 @@ body[data-depth="3"] footer a, body[data-depth="4"] footer a, body[data-depth="5
 .run-layout { padding-top: 26px; }
 .run-hud { display: flex; flex-wrap: wrap; gap: 14px 34px; align-items: center; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 14px 0; }
 .hud-block { display: flex; flex-direction: column; gap: 4px; }
-#hud-floor-name { font: 15px Georgia, "Noto Serif JP", serif; }
+#hud-floor-name { font: 15px "Noto Sans JP", "Hiragino Kaku Gothic ProN", sans-serif; }
 #hud-hp { letter-spacing: 4px; color: var(--accent); font-size: 14px; }
 .hud-ink { flex-direction: row; align-items: center; gap: 8px; }
 .hud-ink .section-label { align-self: center; }
@@ -136,7 +136,7 @@ body[data-depth="3"] .game-sheet, body[data-depth="4"] .game-sheet, body[data-de
 .end-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 16px; border-top: 1px solid var(--line); padding-top: 26px; max-width: 760px; margin: 0 auto; }
 .end-summary div { text-align: center; }
 .end-summary dt { font-size: 10px; letter-spacing: 1.6px; color: var(--muted); text-transform: uppercase; }
-.end-summary dd { margin: 6px 0 0; font: 22px Georgia, "Noto Serif JP", serif; }
+.end-summary dd { margin: 6px 0 0; font: 22px "Noto Sans JP", "Hiragino Kaku Gothic ProN", sans-serif; }
 .end-actions { justify-content: center; margin-top: 28px; }
 .end-hint { text-align: center; }
 
